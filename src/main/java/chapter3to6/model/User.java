@@ -1,4 +1,4 @@
-package model;
+package chapter3to6.model;
 
 public class User {
     private String userId;

@@ -1,4 +1,4 @@
-package webserver;
+package chapter3to6.webserver;
 
 import java.net.ServerSocket;
 import java.net.Socket;

@@ -1,11 +1,10 @@
-package db;
+package chapter3to6.db;
 
 import java.util.Collection;
 import java.util.Map;
 
+import chapter3to6.model.User;
 import com.google.common.collect.Maps;
-
-import model.User;
 
 public class DataBase {
     private static Map<String, User> users = Maps.newHashMap();

@@ -1,4 +1,4 @@
-package util;
+package chapter3to6.util;
 
 import java.io.BufferedReader;
 import java.io.IOException;

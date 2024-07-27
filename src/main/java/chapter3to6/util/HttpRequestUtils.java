@@ -1,4 +1,4 @@
-package util;
+package chapter3to6.util;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -23,6 +23,14 @@ public class HttpRequestUtils {
      */
     public static Map<String, String> parseCookies(String cookies) {
         return parseValues(cookies, ";");
+    }
+
+    public static String parseRequestURL(String contents){
+        return contents.split(" ")[1];
+    }
+
+    public static String getHttpMethod(String contents){
+        return contents.split(" ")[0];
     }
 
     private static Map<String, String> parseValues(String values, String separator) {
