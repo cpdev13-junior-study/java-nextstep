@@ -69,7 +69,13 @@ public class RequestHandler extends Thread {
         DataBase.addUser(user);
 
         DataOutputStream dos = new DataOutputStream(out);
-        response200Header(dos, 0);
+        redirect(dos, "/index.html");
+    }
+
+    private void redirect(DataOutputStream dos, String uri) throws IOException {
+        dos.writeBytes("HTTP/1.1 302 Redirect \r\n");
+        dos.writeBytes("Location: " + uri + "\r\n");
+        dos.writeBytes("\r\n");
     }
 
     private void staticResource(String uri, OutputStream out) throws IOException {
