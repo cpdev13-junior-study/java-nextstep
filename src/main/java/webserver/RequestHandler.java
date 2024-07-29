@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import util.HttpRequestUtils;
 import util.IOUtils;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -16,6 +17,7 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.Collection;
 import java.util.Map;
 
 public class RequestHandler extends Thread {
@@ -51,6 +53,9 @@ public class RequestHandler extends Thread {
                 userLogin(br, out);
                 return;
             }
+            if (uri.startsWith("/user/list")) {
+                userList(br, out);
+            }
 
             staticResource(uri, out);
         } catch (IOException e) {
@@ -82,6 +87,42 @@ public class RequestHandler extends Thread {
             redirectWithCookie(dos, "/index.html", "logined=true");
         }
         redirectWithCookie(dos, "/user/login_failed.html", "logined=false");
+    }
+
+    private void userList(BufferedReader br, OutputStream out) throws IOException {
+        DataOutputStream dos = new DataOutputStream(out);
+
+        String strCookies = getCookie(br);
+        Map<String, String> cookies = HttpRequestUtils.parseCookies(strCookies);
+        String logined = cookies.get("logined");
+        if (logined == null || !logined.equals("true")) {
+            redirect(dos, "/user/login.html");
+        }
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("<ul>");
+        Collection<User> all = DataBase.findAll();
+        for (User user : all) {
+            sb.append("<li>");
+            sb.append(user.getUserId());
+            sb.append("</li>");
+        }
+        sb.append("</ul>");
+
+        byte[] body = sb.toString().getBytes();
+        response200Header(dos, body.length);
+        responseBody(dos, body);
+    }
+
+    private String getCookie(BufferedReader br) throws IOException {
+        String line;
+        while ((line = br.readLine()) != null && !line.isEmpty()) {
+            log.debug("header: {}", line);
+            if (line.contains("Cookie")) {
+                return line.split(":")[1].trim();
+            }
+        }
+        return null;
     }
 
     private void redirectWithCookie(DataOutputStream dos, String uri, String cookie) throws IOException{
