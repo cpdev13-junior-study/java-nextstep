@@ -34,6 +34,8 @@ public class RequestHandler extends Thread {
         try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
             BufferedReader br = new BufferedReader(new java.io.InputStreamReader(in, StandardCharsets.UTF_8));
             String requestLine = br.readLine();
+            log.info("request line: {}", requestLine);
+
             String[] tokens = requestLine.split(" ");
             String method = tokens[0];
             String uri = tokens[1];
@@ -45,6 +47,10 @@ public class RequestHandler extends Thread {
                 log.info("가입된 유저 목록: {}", DataBase.findAll());
                 return;
             }
+            if ("POST".equals(method) && uri.startsWith("/user/login")) {
+                userLogin(br, out);
+                return;
+            }
 
             staticResource(uri, out);
         } catch (IOException e) {
@@ -53,8 +59,40 @@ public class RequestHandler extends Thread {
     }
 
     private void userCreate(BufferedReader br, OutputStream out) throws IOException {
-        int contentLength = 0;
+        int contentLength = getContentLength(br);
+        String requestBody = IOUtils.readData(br, contentLength);
 
+        Map<String, String> params = HttpRequestUtils.parseQueryString(requestBody);
+        User user = new User(params.get("userId"), params.get("password"), params.get("name"), params.get("email"));
+        DataBase.addUser(user);
+
+        DataOutputStream dos = new DataOutputStream(out);
+        redirect(dos, "/index.html");
+    }
+
+    private void userLogin(BufferedReader br, OutputStream out) throws IOException {
+        int contentLength = getContentLength(br);
+        String requestBody = IOUtils.readData(br, contentLength);
+
+        Map<String, String> params = HttpRequestUtils.parseQueryString(requestBody);
+        User user = DataBase.findUserById(params.get("userId"));
+
+        DataOutputStream dos = new DataOutputStream(out);
+        if (user != null && user.getPassword().equals(params.get("password"))) {
+            redirectWithCookie(dos, "/index.html", "logined=true");
+        }
+        redirectWithCookie(dos, "/user/login_failed.html", "logined=false");
+    }
+
+    private void redirectWithCookie(DataOutputStream dos, String uri, String cookie) throws IOException{
+        dos.writeBytes("HTTP/1.1 302 Found \r\n");
+        dos.writeBytes("Location: " + uri + " \r\n");
+        dos.writeBytes("Set-Cookie: " + cookie + "; path=/ \r\n");
+        dos.writeBytes("\r\n");
+    }
+
+    private int getContentLength(BufferedReader br) throws IOException {
+        int contentLength = 0;
         String line;
         while ((line = br.readLine()) != null && !line.isEmpty()) {
             log.debug("header: {}", line);
@@ -62,18 +100,11 @@ public class RequestHandler extends Thread {
                 contentLength = Integer.parseInt(line.split(":")[1].trim());
             }
         }
-        String requestBody = IOUtils.readData(br, contentLength);
-
-        Map<String, String> stringStringMap = HttpRequestUtils.parseQueryString(requestBody);
-        User user = new User(stringStringMap.get("userId"), stringStringMap.get("password"), stringStringMap.get("name"), stringStringMap.get("email"));
-        DataBase.addUser(user);
-
-        DataOutputStream dos = new DataOutputStream(out);
-        redirect(dos, "/index.html");
+        return contentLength;
     }
 
     private void redirect(DataOutputStream dos, String uri) throws IOException {
-        dos.writeBytes("HTTP/1.1 302 Redirect \r\n");
+        dos.writeBytes("HTTP/1.1 302 Found \r\n");
         dos.writeBytes("Location: " + uri + "\r\n");
         dos.writeBytes("\r\n");
     }
