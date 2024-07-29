@@ -5,6 +5,7 @@ import model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import util.HttpRequestUtils;
+import util.IOUtils;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -15,9 +16,7 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.StringTokenizer;
 
 public class RequestHandler extends Thread {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
@@ -35,37 +34,45 @@ public class RequestHandler extends Thread {
         try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
             BufferedReader br = new BufferedReader(new java.io.InputStreamReader(in, StandardCharsets.UTF_8));
             String requestLine = br.readLine();
-            String uri = requestLine.split(" ")[1];
-            if (uri.equals("/")) {
+            String[] tokens = requestLine.split(" ");
+            String method = tokens[0];
+            String uri = tokens[1];
+            if ("/".equals(uri)) {
                 uri = "/index.html";
             }
-            if (uri.startsWith("/user/create")) {
-                userCreate(uri, out);
+            if ("POST".equals(method) && uri.startsWith("/user/create")) {
+                userCreate(br, out);
                 log.info("가입된 유저 목록: {}", DataBase.findAll());
-            }
-            if (uri.equals("/index.html")) {
-                index(uri, out);
+                return;
             }
 
-
+            staticResource(uri, out);
         } catch (IOException e) {
             log.error(e.getMessage());
         }
     }
 
-    private void userCreate(String uri, OutputStream out) throws IOException {
-        int index = uri.indexOf("?");
-        String queryString = uri.substring(index + 1);
-        Map<String, String> params = HttpRequestUtils.parseQueryString(queryString);
+    private void userCreate(BufferedReader br, OutputStream out) throws IOException {
+        int contentLength = 0;
 
-        User user = new User(params.get("userId"), params.get("password"), params.get("name"), params.get("email"));
+        String line;
+        while ((line = br.readLine()) != null && !line.isEmpty()) {
+            log.debug("header: {}", line);
+            if (line.contains("Content-Length")) {
+                contentLength = Integer.parseInt(line.split(":")[1].trim());
+            }
+        }
+        String requestBody = IOUtils.readData(br, contentLength);
+
+        Map<String, String> stringStringMap = HttpRequestUtils.parseQueryString(requestBody);
+        User user = new User(stringStringMap.get("userId"), stringStringMap.get("password"), stringStringMap.get("name"), stringStringMap.get("email"));
         DataBase.addUser(user);
 
         DataOutputStream dos = new DataOutputStream(out);
         response200Header(dos, 0);
     }
 
-    private void index(String uri, OutputStream out) throws IOException {
+    private void staticResource(String uri, OutputStream out) throws IOException {
         byte[] body = Files.readAllBytes(new File("./webapp" + uri).toPath());
 
         DataOutputStream dos = new DataOutputStream(out);
