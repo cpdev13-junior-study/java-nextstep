@@ -1,7 +1,10 @@
 package webserver;
 
+import db.DataBase;
+import model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import util.HttpRequestUtils;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -12,6 +15,8 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.StringTokenizer;
 
 public class RequestHandler extends Thread {
@@ -34,15 +39,38 @@ public class RequestHandler extends Thread {
             if (uri.equals("/")) {
                 uri = "/index.html";
             }
+            if (uri.startsWith("/user/create")) {
+                userCreate(uri, out);
+                log.info("가입된 유저 목록: {}", DataBase.findAll());
+            }
+            if (uri.equals("/index.html")) {
+                index(uri, out);
+            }
 
-            byte[] body = Files.readAllBytes(new File("./webapp" + uri).toPath());
 
-            DataOutputStream dos = new DataOutputStream(out);
-            response200Header(dos, body.length);
-            responseBody(dos, body);
         } catch (IOException e) {
             log.error(e.getMessage());
         }
+    }
+
+    private void userCreate(String uri, OutputStream out) throws IOException {
+        int index = uri.indexOf("?");
+        String queryString = uri.substring(index + 1);
+        Map<String, String> params = HttpRequestUtils.parseQueryString(queryString);
+
+        User user = new User(params.get("userId"), params.get("password"), params.get("name"), params.get("email"));
+        DataBase.addUser(user);
+
+        DataOutputStream dos = new DataOutputStream(out);
+        response200Header(dos, 0);
+    }
+
+    private void index(String uri, OutputStream out) throws IOException {
+        byte[] body = Files.readAllBytes(new File("./webapp" + uri).toPath());
+
+        DataOutputStream dos = new DataOutputStream(out);
+        response200Header(dos, body.length);
+        responseBody(dos, body);
     }
 
     private void response200Header(DataOutputStream dos, int lengthOfBodyContent) throws IOException {
