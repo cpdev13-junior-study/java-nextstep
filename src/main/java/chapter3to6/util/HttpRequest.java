@@ -1,5 +1,6 @@
 package chapter3to6.util;
 
+import chapter3to6.model.Method;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -69,8 +70,8 @@ public class HttpRequest {
         }
     }
 
-    public String getMethod() {
-        return requestLineMap.get("Method");
+    public Method getMethod() {
+        return Method.find(requestLineMap.get("Method"));
     }
 
     public String getPath() {

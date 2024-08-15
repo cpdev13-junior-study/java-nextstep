@@ -1,5 +1,6 @@
 package chapter5;
 
+import chapter3to6.model.Method;
 import chapter3to6.util.HttpRequest;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -17,7 +18,7 @@ public class HttpRequestTest {
         InputStream in = new FileInputStream(new File(testDirectory + "Http_GET.txt"));
         HttpRequest request = new HttpRequest(in);
 
-        Assertions.assertEquals("GET", request.getMethod());
+        Assertions.assertEquals(Method.GET, request.getMethod());
         Assertions.assertEquals("/user/create", request.getPath());
         Assertions.assertEquals("keep-alive", request.getHeader("Connection"));
         Assertions.assertEquals("javajigi", request.getParameter("userId"));
@@ -28,7 +29,7 @@ public class HttpRequestTest {
         InputStream in = new FileInputStream(new File(testDirectory + "Http_POST.txt"));
         HttpRequest request = new HttpRequest(in);
 
-        Assertions.assertEquals("POST", request.getMethod());
+        Assertions.assertEquals(Method.POST, request.getMethod());
         Assertions.assertEquals("/user/create", request.getPath());
         Assertions.assertEquals("keep-alive", request.getHeader("Connection"));
         Assertions.assertEquals("javajigi", request.getParameter("userId"));
