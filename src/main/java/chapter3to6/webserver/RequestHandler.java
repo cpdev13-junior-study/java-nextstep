@@ -2,12 +2,12 @@ package chapter3to6.webserver;
 
 import java.io.*;
 import java.net.Socket;
-import java.nio.file.Files;
 import java.util.*;
 
 import chapter3to6.db.DataBase;
 import chapter3to6.model.User;
 import chapter3to6.util.HttpRequest;
+import chapter3to6.util.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,37 +25,30 @@ public class RequestHandler extends Thread {
 
         try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
             HttpRequest httpRequest = new HttpRequest(in);
-            process(httpRequest, out);
+            HttpResponse httpResponse = new HttpResponse(out);
+            httpResponse.addCookie(httpRequest);
+
+            process(httpRequest, httpResponse);
         } catch (IOException e) {
             log.error(e.getMessage());
         }
     }
 
-    private void process(HttpRequest httpRequest, OutputStream out) throws IOException {
-        DataOutputStream dos = new DataOutputStream(out);
+    private void process(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
         String method = httpRequest.getMethod();
         String path = getDefaultPath(httpRequest.getPath());
+
         if (method.equals("GET")) {
-            byte[] body = null;
             if (path.contains("/user/list")) {
                 String isLogined = httpRequest.getCookie("logined");
                 if (isLogined != null && isLogined.equals("true")) {
                     String html = createUserListHtml();
-                    body = html.getBytes();
-                    response200Header(dos, body.length, httpRequest);
-                    responseBody(dos, body);
+                    httpResponse.forwardDirectBody(html.getBytes());
                 } else {
-                    response302Header(dos, httpRequest, "http://localhost:8080/index.html");
+                    httpResponse.sendRedirect("/index.html");
                 }
             } else {
-                body = Files.readAllBytes(new File("./src/main/java/chapter3to6/webapp" + path).toPath());
-                String accept = httpRequest.getHeader("Accept");
-                if (accept.contains("text/css")) {
-                    response200HeaderWithCss(dos, body.length);
-                } else {
-                    response200Header(dos, body.length, httpRequest);
-                }
-                responseBody(dos, body);
+                httpResponse.forward("/" + path);
             }
 
         }
@@ -69,76 +62,26 @@ public class RequestHandler extends Thread {
                 );
                 log.info("회원가입 결과 = {}", user);
                 DataBase.addUser(user);
-                response302Header(dos, httpRequest, "http://localhost:8080/index.html");
+                httpResponse.sendRedirect("/index.html");
             }
             if (path.contains("/user/login")) {
                 String userId = httpRequest.getParameter("userId");
                 String password = httpRequest.getParameter("password");
 
                 User findUser = DataBase.findUserById(userId);
-                String redirectUrl = "http://localhost:8080/user/login_failed.html";
                 if (findUser != null && findUser.getPassword().equals(password)) {
-                    httpRequest.addCookie("logined", "true");
-                    redirectUrl = "http://localhost:8080/index.html";
-
+                    httpResponse.addCookie("logined", "true");
+                    httpResponse.sendRedirect("/index.html");
                 } else {
-                    httpRequest.addCookie("logined", "false");
+                    httpResponse.addCookie("logined", "false");
+                    httpResponse.sendRedirect("/user/login_failed.html");
                 }
-                response302Header(dos, httpRequest, redirectUrl);
             }
         }
     }
 
     private String getDefaultPath(String path) {
         return path.equals("/") ? "/index.html" : path;
-    }
-
-    private void response200Header(DataOutputStream dos, int lengthOfBodyContent, HttpRequest request) {
-        try {
-            dos.writeBytes("HTTP/1.1 200 OK \r\n");
-            dos.writeBytes("Content-Type: text/html;charset=utf-8\r\n");
-            dos.writeBytes("Content-Length: " + lengthOfBodyContent + "\r\n");
-            setCookie(dos, request);
-            dos.writeBytes("\r\n");
-        } catch (IOException e) {
-            log.error(e.getMessage());
-        }
-    }
-
-    private void response200HeaderWithCss(DataOutputStream dos, int lengthOfBodyContent) {
-        try {
-            dos.writeBytes("HTTP/1.1 200 OK \r\n");
-            dos.writeBytes("Content-Type: text/css;charset=utf-8\r\n");
-            dos.writeBytes("Content-Length: " + lengthOfBodyContent + "\r\n");
-            dos.writeBytes("\r\n");
-        } catch (IOException e) {
-            log.error(e.getMessage());
-        }
-    }
-
-    private void response302Header(DataOutputStream dos, HttpRequest request, String redirectUrl) {
-        try {
-            dos.writeBytes("HTTP/1.1 302 Found \r\n");
-            dos.writeBytes("Location: " + redirectUrl + " \r\n");
-            setCookie(dos, request);
-        } catch (IOException e) {
-            log.error(e.getMessage());
-        }
-    }
-
-    private void setCookie(DataOutputStream dos, HttpRequest request) throws IOException {
-        for (Map.Entry<String, String> entry : request.getCookies().entrySet()) {
-            dos.writeBytes("Set-Cookie: " + entry.getKey() + "=" + entry.getValue() + "; Path=/ \r\n");
-        }
-    }
-
-    private void responseBody(DataOutputStream dos, byte[] body) {
-        try {
-            dos.write(body, 0, body.length);
-            dos.flush();
-        } catch (IOException e) {
-            log.error(e.getMessage());
-        }
     }
 
     private String createUserListHtml() {
