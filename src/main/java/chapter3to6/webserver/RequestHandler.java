@@ -7,18 +7,13 @@ import java.util.*;
 
 import chapter3to6.db.DataBase;
 import chapter3to6.model.User;
-import chapter3to6.util.HttpRequestUtils;
-import chapter3to6.util.IOUtils;
-import com.google.common.collect.Maps;
+import chapter3to6.util.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class RequestHandler extends Thread {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
-    private Map<String, String> headers = new HashMap<>();
-    private Map<String, String> paramMap;
     private Socket connection;
-    private Map<String, String> cookies;
 
     public RequestHandler(Socket connectionSocket) {
         this.connection = connectionSocket;
@@ -29,38 +24,36 @@ public class RequestHandler extends Thread {
                 connection.getPort());
 
         try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(in));
-            parseHttpRequest(bufferedReader);
-
-            process(out);
+            HttpRequest httpRequest = new HttpRequest(in);
+            process(httpRequest, out);
         } catch (IOException e) {
             log.error(e.getMessage());
         }
     }
 
-    private void process(OutputStream out) throws IOException {
+    private void process(HttpRequest httpRequest, OutputStream out) throws IOException {
         DataOutputStream dos = new DataOutputStream(out);
-        String method = headers.get("Method");
-        String path = headers.get("Path");
+        String method = httpRequest.getMethod();
+        String path = getDefaultPath(httpRequest.getPath());
         if (method.equals("GET")) {
             byte[] body = null;
             if (path.contains("/user/list")) {
-                String isLogined = cookies.get("logined");
+                String isLogined = httpRequest.getCookie("logined");
                 if (isLogined != null && isLogined.equals("true")) {
                     String html = createUserListHtml();
                     body = html.getBytes();
-                    response200Header(dos, body.length);
+                    response200Header(dos, body.length, httpRequest);
                     responseBody(dos, body);
                 } else {
-                    response302Header(dos, "http://localhost:8080/index.html");
+                    response302Header(dos, httpRequest, "http://localhost:8080/index.html");
                 }
             } else {
                 body = Files.readAllBytes(new File("./src/main/java/chapter3to6/webapp" + path).toPath());
-                String accept = headers.get("Accept");
+                String accept = httpRequest.getHeader("Accept");
                 if (accept.contains("text/css")) {
                     response200HeaderWithCss(dos, body.length);
                 } else {
-                    response200Header(dos, body.length);
+                    response200Header(dos, body.length, httpRequest);
                 }
                 responseBody(dos, body);
             }
@@ -68,74 +61,44 @@ public class RequestHandler extends Thread {
         }
         if (method.equals("POST")) {
             if (path.contains("/user/create")) {
-                User user = new User(paramMap.get("userId"), paramMap.get("password"), paramMap.get("name"), paramMap.get("email"));
+                User user = new User(
+                        httpRequest.getParameter("userId"),
+                        httpRequest.getParameter("password"),
+                        httpRequest.getParameter("name"),
+                        httpRequest.getParameter("email")
+                );
                 log.info("회원가입 결과 = {}", user);
                 DataBase.addUser(user);
-                response302Header(dos, "http://localhost:8080/index.html");
+                response302Header(dos, httpRequest, "http://localhost:8080/index.html");
             }
             if (path.contains("/user/login")) {
-                String userId = paramMap.get("userId");
-                String password = paramMap.get("password");
+                String userId = httpRequest.getParameter("userId");
+                String password = httpRequest.getParameter("password");
+
                 User findUser = DataBase.findUserById(userId);
                 String redirectUrl = "http://localhost:8080/user/login_failed.html";
                 if (findUser != null && findUser.getPassword().equals(password)) {
-                    addCookie("logined", "true");
+                    httpRequest.addCookie("logined", "true");
                     redirectUrl = "http://localhost:8080/index.html";
 
                 } else {
-                    addCookie("logined", "false");
+                    httpRequest.addCookie("logined", "false");
                 }
-                response302Header(dos, redirectUrl);
+                response302Header(dos, httpRequest, redirectUrl);
             }
         }
     }
 
-    private Map<String, String> parseRequestBody(BufferedReader bf) throws IOException {
-        String contentLength = headers.get("Content-Length");
-        if (contentLength != null) {
-            int length = Integer.parseInt(contentLength);
-            if (length > 0) {
-                String body = IOUtils.readData(bf, length);
-                return HttpRequestUtils.parseQueryString(body);
-            }
-        }
-        return Maps.newHashMap();
+    private String getDefaultPath(String path) {
+        return path.equals("/") ? "/index.html" : path;
     }
 
-    private String addCookie(String key, String value) {
-        return cookies.put(key, value);
-    }
-
-    private void parseHttpRequest(BufferedReader in) throws IOException {
-        List<String> requestHeaders = new ArrayList<>();
-
-        String line = null;
-        while (!(line = in.readLine()).equals("")) {
-            if (line == null) {
-                return;
-            }
-            if (HttpRequestUtils.parseHeader(line) != null) {
-                HttpRequestUtils.Pair headerPair = HttpRequestUtils.parseHeader(line);
-                headers.put(headerPair.getKey(), headerPair.getValue());
-            }
-            requestHeaders.add(line);
-        }
-
-        String[] split = requestHeaders.get(0).split(" ");
-        headers.put("Method",split[0]);
-        headers.put("Path", split[1]);
-
-        paramMap = parseRequestBody(in);
-        cookies = HttpRequestUtils.parseCookies(headers.get("Cookie"));
-
-    }
-
-    private void response200Header(DataOutputStream dos, int lengthOfBodyContent) {
+    private void response200Header(DataOutputStream dos, int lengthOfBodyContent, HttpRequest request) {
         try {
             dos.writeBytes("HTTP/1.1 200 OK \r\n");
             dos.writeBytes("Content-Type: text/html;charset=utf-8\r\n");
             dos.writeBytes("Content-Length: " + lengthOfBodyContent + "\r\n");
-            setCookie(dos);
+            setCookie(dos, request);
             dos.writeBytes("\r\n");
         } catch (IOException e) {
             log.error(e.getMessage());
@@ -153,18 +116,18 @@ public class RequestHandler extends Thread {
         }
     }
 
-    private void response302Header(DataOutputStream dos, String redirectUrl) {
+    private void response302Header(DataOutputStream dos, HttpRequest request, String redirectUrl) {
         try {
             dos.writeBytes("HTTP/1.1 302 Found \r\n");
-            dos.writeBytes("Location: " + redirectUrl+" \r\n");
-            setCookie(dos);
+            dos.writeBytes("Location: " + redirectUrl + " \r\n");
+            setCookie(dos, request);
         } catch (IOException e) {
             log.error(e.getMessage());
         }
     }
 
-    private void setCookie(DataOutputStream dos) throws IOException {
-        for (Map.Entry<String, String> entry : cookies.entrySet()) {
+    private void setCookie(DataOutputStream dos, HttpRequest request) throws IOException {
+        for (Map.Entry<String, String> entry : request.getCookies().entrySet()) {
             dos.writeBytes("Set-Cookie: " + entry.getKey() + "=" + entry.getValue() + "; Path=/ \r\n");
         }
     }
