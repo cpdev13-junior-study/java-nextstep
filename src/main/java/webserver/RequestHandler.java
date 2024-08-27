@@ -5,14 +5,12 @@ import model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import util.HttpRequest;
-import util.HttpRequestUtils;
-import util.IOUtils;
+import util.HttpResponse;
 
 import java.io.*;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.util.Collection;
-import java.util.Map;
 
 public class RequestHandler extends Thread {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
@@ -28,6 +26,7 @@ public class RequestHandler extends Thread {
 
         try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
             HttpRequest request = new HttpRequest(in);
+            HttpResponse response = new HttpResponse(out);
 
             String method = request.getMethod();
             String path = request.getPath();
@@ -38,52 +37,50 @@ public class RequestHandler extends Thread {
             }
 
             if ("POST".equals(method) && path.startsWith("/user/create")) {
-                userCreate(request, out);
+                userCreate(request, response);
                 log.info("가입된 유저 목록: {}", DataBase.findAll());
                 return;
             }
 
             if ("POST".equals(method) && path.startsWith("/user/login")) {
-                userLogin(request, out);
+                userLogin(request, response);
                 return;
             }
 
             if (path.startsWith("/user/list")) {
-                userList(request, out);
+                userList(request, response);
                 return;
             }
 
-            staticResource(path, out);
+            staticResource(path, response);
         } catch (Exception e) {
             log.error(e.getMessage());
         }
     }
 
-    private void userCreate(HttpRequest request, OutputStream out) throws IOException {
+    private void userCreate(HttpRequest request, HttpResponse response) throws IOException {
         User user = new User(request.getParameter("userId"), request.getParameter("password"), request.getParameter("name"), request.getParameter("email"));
         DataBase.addUser(user);
 
-        DataOutputStream dos = new DataOutputStream(out);
-        redirect(dos, "/index.html");
+        response.sendRedirect("/index.html");
     }
 
-    private void userLogin(HttpRequest request, OutputStream out) throws IOException {
+    private void userLogin(HttpRequest request, HttpResponse response) throws IOException {
         User user = DataBase.findUserById(request.getParameter("userId"));
 
-        DataOutputStream dos = new DataOutputStream(out);
         if (user != null && user.getPassword().equals(request.getParameter("password"))) {
-            redirectWithCookie(dos, "/index.html", "logined=true");
+            response.addHeader("Set-Cookie", "logined=true; path=/");
+            response.sendRedirect("/index.html");
         } else {
-            redirectWithCookie(dos, "/user/login_failed.html", "logined=false");
+            response.addHeader("Set-Cookie", "logined=false; path=/");
+            response.sendRedirect("/user/login_failed.html");
         }
     }
 
-    private void userList(HttpRequest request, OutputStream out) throws IOException {
-        DataOutputStream dos = new DataOutputStream(out);
-
-        String logined = request.getHeader("Cookie");
-        if (logined == null || !logined.contains("logined=true")) {
-            redirect(dos, "/user/login.html");
+    private void userList(HttpRequest request, HttpResponse response) throws IOException {
+        String cookies = request.getHeader("Cookie");
+        if (cookies == null || !cookies.contains("logined=true")) {
+            response.sendRedirect("/user/login.html");
             return;
         }
 
@@ -97,52 +94,18 @@ public class RequestHandler extends Thread {
         }
         sb.append("</ul>");
 
-        byte[] body = sb.toString().getBytes();
-        response200Header(dos, body.length);
-        responseBody(dos, body);
+        response.forward(sb.toString());
     }
 
-    private void redirectWithCookie(DataOutputStream dos, String uri, String cookie) throws IOException {
-        dos.writeBytes("HTTP/1.1 302 Found \r\n");
-        dos.writeBytes("Location: " + uri + " \r\n");
-        dos.writeBytes("Set-Cookie: " + cookie + "; path=/ \r\n");
-        dos.writeBytes("\r\n");
-    }
-
-    private void redirect(DataOutputStream dos, String uri) throws IOException {
-        dos.writeBytes("HTTP/1.1 302 Found \r\n");
-        dos.writeBytes("Location: " + uri + "\r\n");
-        dos.writeBytes("\r\n");
-    }
-
-    private void staticResource(String uri, OutputStream out) throws IOException {
+    private void staticResource(String uri, HttpResponse response) throws IOException {
         byte[] body = Files.readAllBytes(new File("./webapp" + uri).toPath());
 
-        DataOutputStream dos = new DataOutputStream(out);
         if (uri.endsWith(".css")) {
-            response200CssHeader(dos, body.length);
+            response.addHeader("Content-Type", "text/css,*/*;q=0.1");
         } else {
-            response200Header(dos, body.length);
+            response.addHeader("Content-Type", "text/html;charset=utf-8");
         }
-        responseBody(dos, body);
-    }
 
-    private void response200CssHeader(DataOutputStream dos, int lengthOfBodyContent) throws IOException {
-        dos.writeBytes("HTTP/1.1 200 OK \r\n");
-        dos.writeBytes("Content-Type: text/css,*/*,q=0.1\r\n");
-        dos.writeBytes("Content-Length: " + lengthOfBodyContent + "\r\n");
-        dos.writeBytes("\r\n");
-    }
-
-    private void response200Header(DataOutputStream dos, int lengthOfBodyContent) throws IOException {
-        dos.writeBytes("HTTP/1.1 200 OK \r\n");
-        dos.writeBytes("Content-Type: text/html;charset=utf-8\r\n");
-        dos.writeBytes("Content-Length: " + lengthOfBodyContent + "\r\n");
-        dos.writeBytes("\r\n");
-    }
-
-    private void responseBody(DataOutputStream dos, byte[] body) throws IOException {
-        dos.write(body, 0, body.length);
-        dos.flush();
+        response.forward(body);
     }
 }
