@@ -1,24 +1,31 @@
 package webserver;
 
-import db.DataBase;
-import model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import util.Controller;
 import util.HttpRequest;
 import util.HttpResponse;
 
 import java.io.*;
 import java.net.Socket;
 import java.nio.file.Files;
-import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 public class RequestHandler extends Thread {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
-
     private Socket connection;
+    private Map<String, Controller> controllerMap = new HashMap<>();
 
     public RequestHandler(Socket connectionSocket) {
         this.connection = connectionSocket;
+        initializeControllers();
+    }
+
+    private void initializeControllers() {
+        controllerMap.put("/user/create", new UserCreateController());
+        controllerMap.put("/user/login", new UserLoginController());
+        controllerMap.put("/user/list", new UserListController());
     }
 
     public void run() {
@@ -28,7 +35,6 @@ public class RequestHandler extends Thread {
             HttpRequest request = new HttpRequest(in);
             HttpResponse response = new HttpResponse(out);
 
-            String method = request.getMethod();
             String path = request.getPath();
             log.info("request path: {}", path);
 
@@ -36,65 +42,15 @@ public class RequestHandler extends Thread {
                 path = "/index.html";
             }
 
-            if ("POST".equals(method) && path.startsWith("/user/create")) {
-                userCreate(request, response);
-                log.info("가입된 유저 목록: {}", DataBase.findAll());
-                return;
+            Controller controller = controllerMap.get(path);
+            if (controller != null) {
+                controller.service(request, response);
+            } else {
+                staticResource(path, response);
             }
-
-            if ("POST".equals(method) && path.startsWith("/user/login")) {
-                userLogin(request, response);
-                return;
-            }
-
-            if (path.startsWith("/user/list")) {
-                userList(request, response);
-                return;
-            }
-
-            staticResource(path, response);
         } catch (Exception e) {
             log.error(e.getMessage());
         }
-    }
-
-    private void userCreate(HttpRequest request, HttpResponse response) throws IOException {
-        User user = new User(request.getParameter("userId"), request.getParameter("password"), request.getParameter("name"), request.getParameter("email"));
-        DataBase.addUser(user);
-
-        response.sendRedirect("/index.html");
-    }
-
-    private void userLogin(HttpRequest request, HttpResponse response) throws IOException {
-        User user = DataBase.findUserById(request.getParameter("userId"));
-
-        if (user != null && user.getPassword().equals(request.getParameter("password"))) {
-            response.addHeader("Set-Cookie", "logined=true; path=/");
-            response.sendRedirect("/index.html");
-        } else {
-            response.addHeader("Set-Cookie", "logined=false; path=/");
-            response.sendRedirect("/user/login_failed.html");
-        }
-    }
-
-    private void userList(HttpRequest request, HttpResponse response) throws IOException {
-        String cookies = request.getHeader("Cookie");
-        if (cookies == null || !cookies.contains("logined=true")) {
-            response.sendRedirect("/user/login.html");
-            return;
-        }
-
-        StringBuilder sb = new StringBuilder();
-        sb.append("<ul>");
-        Collection<User> all = DataBase.findAll();
-        for (User user : all) {
-            sb.append("<li>");
-            sb.append(user.getUserId());
-            sb.append("</li>");
-        }
-        sb.append("</ul>");
-
-        response.forward(sb.toString());
     }
 
     private void staticResource(String uri, HttpResponse response) throws IOException {
