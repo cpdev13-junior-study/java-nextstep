@@ -2,6 +2,7 @@ package chapter6to12.next.web;
 
 
 import chapter6to12.core.db.DataBase;
+import chapter6to12.next.model.User;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -17,8 +18,14 @@ public class ListUserServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        req.setAttribute("users", DataBase.findAll());
-        RequestDispatcher rd = req.getRequestDispatcher("/user/list.jsp");
-        rd.forward(req, resp);
+        User user = (User) req.getSession().getAttribute("user");
+        if (user == null) {
+            resp.sendRedirect("/index.jsp");
+        } else {
+            req.setAttribute("users", DataBase.findAll());
+            RequestDispatcher rd = req.getRequestDispatcher("/user/list.jsp");
+            rd.forward(req, resp);
+        }
+
     }
 }

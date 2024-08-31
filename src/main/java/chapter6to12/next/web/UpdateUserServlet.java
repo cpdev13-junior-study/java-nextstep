@@ -29,6 +29,10 @@ public class UpdateUserServlet extends HttpServlet {
         String password = req.getParameter("password");
         String name = req.getParameter("name");
 
+        User loginUser = (User) req.getSession().getAttribute("user");
+        if (!loginUser.getUserId().equals(userId)) {
+            throw new RuntimeException("수정할 수 없습니다.");
+        }
         User findUser = DataBase.findUserById(userId);
         findUser.setEmail(email);
         findUser.setPassword(password);
