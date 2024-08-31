@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 @RequiredArgsConstructor
 @Getter
@@ -68,6 +69,11 @@ public class HttpRequest {
                 paramMap = HttpRequestUtils.parseQueryString(IOUtils.readData(in, length));
             }
         }
+    }
+
+    public HttpSession getSession() {
+        String sessionCookie = getCookie("JSESSIONID");
+        return HttpSessions.getSession(sessionCookie);
     }
 
     public Method getMethod() {
