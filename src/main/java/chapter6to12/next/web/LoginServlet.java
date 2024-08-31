@@ -26,4 +26,9 @@ public class LoginServlet extends HttpServlet {
 
         resp.sendRedirect("/index.jsp");
     }
+
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        req.getRequestDispatcher("/user/login.jsp").forward(req,resp);
+    }
 }

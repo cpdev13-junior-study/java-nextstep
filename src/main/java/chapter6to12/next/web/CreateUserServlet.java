@@ -25,4 +25,9 @@ public class CreateUserServlet extends HttpServlet {
         DataBase.addUser(user);
         resp.sendRedirect("/user/list");
     }
+
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        req.getRequestDispatcher("/user/form.jsp").forward(req, resp);
+    }
 }
