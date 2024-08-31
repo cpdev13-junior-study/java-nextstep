@@ -1,5 +1,8 @@
 package chapter6to12.next.model;
 
+import lombok.Setter;
+
+@Setter
 public class User {
     private String userId;
     private String password;
