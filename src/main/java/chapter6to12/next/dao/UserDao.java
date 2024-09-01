@@ -2,7 +2,6 @@ package chapter6to12.next.dao;
 
 import chapter6to12.next.model.User;
 
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -24,7 +23,7 @@ public class UserDao {
     public User findByUserId(String userId) throws SQLException {
         String sql = "SELECT userId, password, name, email FROM USERS WHERE userId=?";
         JdbcTemplate jdbcTemplate = new JdbcTemplate();
-        return (User) jdbcTemplate.queryForObject(
+        return jdbcTemplate.queryForObject(
                 sql,
                 pstmt -> pstmt.setString(1, userId),
                 rs -> new User(rs.getString("userId"), rs.getString("password"), rs.getString("name"), rs.getString("email"))
@@ -36,8 +35,7 @@ public class UserDao {
         JdbcTemplate jdbcTemplate = new JdbcTemplate();
         return jdbcTemplate.query(
                 sql,
-                pstmt -> {
-                },
+                pstmt -> {},
                 rs -> new User(rs.getString("userId"), rs.getString("password"), rs.getString("name"), rs.getString("email"))
         );
     }
