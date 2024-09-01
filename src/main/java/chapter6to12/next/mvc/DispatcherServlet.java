@@ -1,6 +1,7 @@
 package chapter6to12.next.mvc;
 
 import chapter6to12.next.web.Controller.*;
+import chapter6to12.next.web.Controller.qna.AnswerController;
 import chapter6to12.next.web.Controller.qna.ShowController;
 import chapter6to12.next.web.Controller.user.*;
 import org.slf4j.Logger;
@@ -35,7 +36,10 @@ public class DispatcherServlet extends HttpServlet {
         }
         try {
             String viewName = controller.execute(req, resp);
-            send(viewName, req, resp);
+            if (viewName != null) {
+                send(viewName, req, resp);
+            }
+
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -60,6 +64,7 @@ public class DispatcherServlet extends HttpServlet {
             mapping.put("/user/logout", new LogoutController());
             mapping.put("/user/update", new UpdateUserController());
             mapping.put("/qna/show", new ShowController());
+            mapping.put("/api/qna/answer", new AnswerController());
             mapping.put("/", new HomeController());
         }
 
