@@ -34,8 +34,9 @@ public class DispatcherServlet extends HttpServlet {
             throw new RuntimeException("올바르지 않은 url입니다.");
         }
         try {
-            View view = controller.execute(req, resp);
-            view.render(req, resp);
+            ModelAndView mav = controller.execute(req, resp);
+            View view = mav.getView();
+            view.render(mav.getModel(), req, resp);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
