@@ -2,6 +2,7 @@ package chapter3to6.webserver;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.UUID;
 
 import chapter3to6.controller.Controller;
 import chapter3to6.util.HttpRequest;
@@ -24,9 +25,14 @@ public class RequestHandler extends Thread {
                 connection.getPort());
 
         try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
+
             HttpRequest httpRequest = new HttpRequest(in);
             HttpResponse httpResponse = new HttpResponse(out);
+            if(httpRequest.getCookies().get("JSESSIONID")==null){
+                httpRequest.addCookie("JSESSIONID", UUID.randomUUID().toString());
+            }
             httpResponse.addCookie(httpRequest);
+
 
             Controller controller = requestMapping.getController(httpRequest.getPath());
             if (controller == null) {

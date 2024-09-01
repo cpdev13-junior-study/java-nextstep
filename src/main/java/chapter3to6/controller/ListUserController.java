@@ -7,11 +7,11 @@ import chapter3to6.util.HttpResponse;
 
 import java.util.List;
 
-public class ListUserController extends AbstractController{
+public class ListUserController extends AbstractController {
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) {
-        String isLogined = request.getCookie("logined");
-        if (isLogined != null && isLogined.equals("true")) {
+        boolean isLogined = request.getSession().getAttribute("user") != null;
+        if (isLogined) {
             String html = createUserListHtml();
             response.forwardDirectBody(html.getBytes());
         } else {

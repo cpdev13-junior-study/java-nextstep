@@ -4,6 +4,7 @@ import chapter3to6.db.DataBase;
 import chapter3to6.model.User;
 import chapter3to6.util.HttpRequest;
 import chapter3to6.util.HttpResponse;
+import chapter3to6.util.HttpSession;
 
 public class LoginController extends AbstractController {
 
@@ -14,10 +15,10 @@ public class LoginController extends AbstractController {
 
         User findUser = DataBase.findUserById(userId);
         if (findUser != null && findUser.getPassword().equals(password)) {
-            response.addCookie("logined", "true");
+            HttpSession session = request.getSession();
+            session.setAttribute("user", findUser);
             response.sendRedirect("/index.html");
         } else {
-            response.addCookie("logined", "false");
             response.sendRedirect("/user/login_failed.html");
         }
     }
