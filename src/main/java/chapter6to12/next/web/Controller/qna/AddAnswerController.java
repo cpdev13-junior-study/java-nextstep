@@ -11,8 +11,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.PrintWriter;
 
-public class AnswerController extends AbstractController {
-    private static final Logger log = LoggerFactory.getLogger(AnswerController.class);
+public class AddAnswerController extends AbstractController {
+    private static final Logger log = LoggerFactory.getLogger(AddAnswerController.class);
 
     @Override
     protected String doPost(HttpServletRequest request, HttpServletResponse response) throws Exception {
