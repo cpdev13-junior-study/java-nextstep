@@ -1,4 +1,4 @@
-package chapter6to12.next.web.Controller;
+package chapter6to12.next.web.Controller.user;
 
 
 import chapter6to12.core.db.DataBase;

@@ -1,30 +1,30 @@
-package chapter6to12.next.web.Controller;
+package chapter6to12.next.web.Controller.user;
 
-import chapter6to12.core.db.DataBase;
 import chapter6to12.next.dao.UserDao;
 import chapter6to12.next.model.User;
 import chapter6to12.next.mvc.AbstractController;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-public class LoginController extends AbstractController {
+public class CreateUserController extends AbstractController {
+    private static final Logger log = LoggerFactory.getLogger(CreateUserController.class);
 
     @Override
     protected String doPost(HttpServletRequest req, HttpServletResponse resp) throws Exception {
-        String userId = req.getParameter("userId");
-        String password = req.getParameter("password");
-        UserDao userDao = new UserDao();
-        User findUser = userDao.findByUserId(userId);
+        User user = new User(req.getParameter("userId"), req.getParameter("password"), req.getParameter("name"),
+                req.getParameter("email"));
+        log.debug("user : {}", user);
 
-        if (findUser != null && password.equals(findUser.getPassword())) {
-            req.getSession().setAttribute("user", findUser);
-        }
+        UserDao userDao = new UserDao();
+        userDao.insert(user);
         return "redirect:/";
     }
 
     @Override
     protected String doGet(HttpServletRequest req, HttpServletResponse resp) throws Exception {
-        return "/user/login.jsp";
+        return "/user/form.jsp";
     }
 }

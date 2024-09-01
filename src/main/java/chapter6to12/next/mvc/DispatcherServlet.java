@@ -1,6 +1,8 @@
 package chapter6to12.next.mvc;
 
 import chapter6to12.next.web.Controller.*;
+import chapter6to12.next.web.Controller.qna.ShowController;
+import chapter6to12.next.web.Controller.user.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,6 +59,7 @@ public class DispatcherServlet extends HttpServlet {
             mapping.put("/user/login", new LoginController());
             mapping.put("/user/logout", new LogoutController());
             mapping.put("/user/update", new UpdateUserController());
+            mapping.put("/qna/show", new ShowController());
             mapping.put("/", new HomeController());
         }
 
