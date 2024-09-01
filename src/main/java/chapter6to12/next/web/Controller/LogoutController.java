@@ -10,6 +10,6 @@ public class LogoutController extends AbstractController {
     @Override
     protected String doGet(HttpServletRequest req, HttpServletResponse resp) throws Exception {
         req.getSession().invalidate();
-        return "redirect:/index.jsp";
+        return "redirect:/";
     }
 }

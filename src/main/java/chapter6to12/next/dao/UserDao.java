@@ -2,11 +2,10 @@ package chapter6to12.next.dao;
 
 import chapter6to12.next.model.User;
 
-import java.sql.SQLException;
 import java.util.List;
 
 public class UserDao {
-    public void insert(User user) throws SQLException {
+    public void insert(User user) {
         String sql = "INSERT INTO USERS VALUES (?, ?, ?, ?)";
         JdbcTemplate insertJdbcTemplate = new JdbcTemplate();
         insertJdbcTemplate.insert(
@@ -20,37 +19,34 @@ public class UserDao {
         );
     }
 
-    public User findByUserId(String userId) throws SQLException {
+    public User findByUserId(String userId) {
         String sql = "SELECT userId, password, name, email FROM USERS WHERE userId=?";
         JdbcTemplate jdbcTemplate = new JdbcTemplate();
         return jdbcTemplate.queryForObject(
                 sql,
-                pstmt -> pstmt.setString(1, userId),
-                rs -> new User(rs.getString("userId"), rs.getString("password"), rs.getString("name"), rs.getString("email"))
+                rs -> new User(rs.getString("userId"), rs.getString("password"), rs.getString("name"), rs.getString("email")),
+                userId
         );
     }
 
-    public List<User> findAll() throws SQLException {
+    public List<User> findAll() {
         String sql = "SELECT userId, password, name, email FROM USERS";
         JdbcTemplate jdbcTemplate = new JdbcTemplate();
         return jdbcTemplate.query(
                 sql,
-                pstmt -> {},
                 rs -> new User(rs.getString("userId"), rs.getString("password"), rs.getString("name"), rs.getString("email"))
         );
     }
 
-    public void update(User user) throws SQLException {
+    public void update(User user) {
         String sql = "UPDATE USERS SET password=?,email=?, name=? WHERE userId=?";
         JdbcTemplate updateJdbcTemplate = new JdbcTemplate();
         updateJdbcTemplate.update(
                 sql,
-                pstmt -> {
-                    pstmt.setString(1, user.getPassword());
-                    pstmt.setString(2, user.getEmail());
-                    pstmt.setString(3, user.getName());
-                    pstmt.setString(4, user.getUserId());
-                }
+                user.getPassword(),
+                user.getEmail(),
+                user.getName(),
+                user.getUserId()
         );
     }
 }

@@ -57,6 +57,7 @@ public class DispatcherServlet extends HttpServlet {
             mapping.put("/user/login", new LoginController());
             mapping.put("/user/logout", new LogoutController());
             mapping.put("/user/update", new UpdateUserController());
+            mapping.put("/", new HomeController());
         }
 
         public Controller getController(String url) {

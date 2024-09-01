@@ -9,6 +9,6 @@ public class HomeController extends AbstractController {
 
     @Override
     protected String doGet(HttpServletRequest request, HttpServletResponse response) throws Exception {
-        return "index.jsp";
+        return "home.jsp";
     }
 }
