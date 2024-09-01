@@ -96,4 +96,28 @@ public class UserDao {
             }
         }
     }
+
+    public void update(User user) throws SQLException {
+        Connection con = null;
+        PreparedStatement pstmt = null;
+        try {
+            con = ConnectionManager.getConnection();
+            String sql = "UPDATE USERS SET password=?,email=?, name=? WHERE userId=?";
+            pstmt = con.prepareStatement(sql);
+            pstmt.setString(1, user.getPassword());
+            pstmt.setString(2, user.getEmail());
+            pstmt.setString(3, user.getName());
+            pstmt.setString(4, user.getUserId());
+
+            pstmt.executeUpdate();
+        } finally {
+            if (pstmt != null) {
+                pstmt.close();
+            }
+
+            if (con != null) {
+                con.close();
+            }
+        }
+    }
 }
