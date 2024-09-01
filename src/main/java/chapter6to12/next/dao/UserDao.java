@@ -18,6 +18,11 @@ public class UserDao {
                 pstmt.setString(3, user.getName());
                 pstmt.setString(4, user.getEmail());
             }
+
+            @Override
+            Object mapRow(ResultSet resultSet) throws SQLException {
+                return null;
+            }
         };
         insertJdbcTemplate.insert(sql);
     }
@@ -25,7 +30,7 @@ public class UserDao {
     public User findByUserId(String userId) throws SQLException {
         String sql = "SELECT userId, password, name, email FROM USERS WHERE userId=?";
 
-        SelectJdbcTemplate selectJdbcTemplate = new SelectJdbcTemplate() {
+        JdbcTemplate jdbcTemplate = new JdbcTemplate() {
             @Override
             void setValues(PreparedStatement pstmt) throws SQLException {
                 pstmt.setString(1, userId);
@@ -37,16 +42,15 @@ public class UserDao {
                         rs.getString("email"));
             }
         };
-        return (User) selectJdbcTemplate.queryForObject(sql);
+        return (User) jdbcTemplate.queryForObject(sql);
     }
 
     public List<User> findAll() throws SQLException {
         String sql = "SELECT userId, password, name, email FROM USERS";
 
-        SelectJdbcTemplate selectJdbcTemplate = new SelectJdbcTemplate() {
+        JdbcTemplate jdbcTemplate = new JdbcTemplate() {
             @Override
-            void setValues(PreparedStatement pstmt) throws SQLException {
-            }
+            void setValues(PreparedStatement pstmt) throws SQLException {}
 
             @Override
             Object mapRow(ResultSet rs) throws SQLException {
@@ -54,7 +58,7 @@ public class UserDao {
                         rs.getString("email"));
             }
         };
-        return selectJdbcTemplate.query(sql);
+        return jdbcTemplate.query(sql);
     }
 
     public void update(User user) throws SQLException {
@@ -66,6 +70,11 @@ public class UserDao {
                 pstmt.setString(2, user.getEmail());
                 pstmt.setString(3, user.getName());
                 pstmt.setString(4, user.getUserId());
+            }
+
+            @Override
+            Object mapRow(ResultSet resultSet) throws SQLException {
+                return null;
             }
         };
         updateJdbcTemplate.update(sql);
