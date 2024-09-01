@@ -1,5 +1,6 @@
 package chapter6to12.next.dao;
 
+import chapter6to12.next.jdbc.JdbcTemplate;
 import chapter6to12.next.model.User;
 
 import java.util.List;

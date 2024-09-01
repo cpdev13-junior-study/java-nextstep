@@ -1,4 +1,4 @@
-package chapter6to12.next.dao;
+package chapter6to12.next.jdbc;
 
 import chapter6to12.core.jdbc.ConnectionManager;
 
@@ -11,7 +11,7 @@ import java.util.List;
 
 public class JdbcTemplate {
 
-    void insert(String sql, PreparedStatementSetter preparedStatementSetter) {
+    public void insert(String sql, PreparedStatementSetter preparedStatementSetter) {
 
         try (Connection con = ConnectionManager.getConnection();
              PreparedStatement pstmt = con.prepareStatement(sql)) {
@@ -37,6 +37,21 @@ public class JdbcTemplate {
 
     public void update(String sql, Object... params) {
         update(sql, createPreparedStatementSetter(params));
+    }
+
+    public void update(PreparedStatementCreator psc, KeyHolder holder) {
+        try (Connection conn = ConnectionManager.getConnection()) {
+            PreparedStatement ps = psc.createPreparedStatement(conn);
+            ps.executeUpdate();
+
+            ResultSet rs = ps.getGeneratedKeys();
+            if (rs.next()) {
+                holder.setId(rs.getLong(1));
+            }
+            rs.close();
+        } catch (SQLException e) {
+            throw new DataAccessException(e);
+        }
     }
 
     public <T> List<T> query(String sql, PreparedStatementSetter preparedStatementSetter, RowMapper<T> rowMapper) {

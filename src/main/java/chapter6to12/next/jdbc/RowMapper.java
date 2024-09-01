@@ -1,4 +1,4 @@
-package chapter6to12.next.dao;
+package chapter6to12.next.jdbc;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

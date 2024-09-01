@@ -1,6 +1,10 @@
 package chapter6to12.next.mvc;
 
 import chapter6to12.next.web.Controller.*;
+import chapter6to12.next.web.Controller.qna.AddAnswerController;
+import chapter6to12.next.web.Controller.qna.DeleteAnswerController;
+import chapter6to12.next.web.Controller.qna.ShowController;
+import chapter6to12.next.web.Controller.user.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,8 +22,6 @@ public class DispatcherServlet extends HttpServlet {
 
     private static final Logger logger = LoggerFactory.getLogger(DispatcherServlet.class);
 
-    private final static String REDIRECT_PREFIX = "redirect:";
-
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         RequestMapping requestMapping = new RequestMapping();
@@ -32,20 +34,13 @@ public class DispatcherServlet extends HttpServlet {
             throw new RuntimeException("올바르지 않은 url입니다.");
         }
         try {
-            String viewName = controller.execute(req, resp);
-            send(viewName, req, resp);
+            ModelAndView mav = controller.execute(req, resp);
+            View view = mav.getView();
+            view.render(mav.getModel(), req, resp);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
 
-    }
-
-    private void send(String viewName, HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        if (viewName.startsWith(REDIRECT_PREFIX)) {
-            resp.sendRedirect(viewName.substring(REDIRECT_PREFIX.length()));
-        } else {
-            req.getRequestDispatcher(viewName).forward(req, resp);
-        }
     }
 
     static class RequestMapping {
@@ -57,6 +52,9 @@ public class DispatcherServlet extends HttpServlet {
             mapping.put("/user/login", new LoginController());
             mapping.put("/user/logout", new LogoutController());
             mapping.put("/user/update", new UpdateUserController());
+            mapping.put("/qna/show", new ShowController());
+            mapping.put("/api/qna/addAnswer", new AddAnswerController());
+            mapping.put("/api/qna/deleteAnswer", new DeleteAnswerController());
             mapping.put("/", new HomeController());
         }
 
