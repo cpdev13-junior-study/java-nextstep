@@ -1,29 +1,23 @@
-package chapter6to12.next.web;
+package chapter6to12.next.web.Controller;
 
 import chapter6to12.core.db.DataBase;
 import chapter6to12.next.model.User;
+import chapter6to12.next.mvc.AbstractController;
 
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 
-@WebServlet("/user/update")
-public class UpdateUserServlet extends HttpServlet {
+public class UpdateUserController extends AbstractController {
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected String doGet(HttpServletRequest req, HttpServletResponse resp) throws Exception {
         String userId = req.getParameter("userId");
         User user = DataBase.findUserById(userId);
         req.setAttribute("user", user);
-        RequestDispatcher rd = req.getRequestDispatcher("/user/update.jsp");
-        rd.forward(req, resp);
+        return "/user/update.jsp";
     }
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected String doPost(HttpServletRequest req, HttpServletResponse resp) throws Exception {
         String userId = req.getParameter("userId");
         String email = req.getParameter("email");
         String password = req.getParameter("password");
@@ -37,6 +31,6 @@ public class UpdateUserServlet extends HttpServlet {
         findUser.setEmail(email);
         findUser.setPassword(password);
         findUser.setName(name);
-        resp.sendRedirect("/user/list");
+        return "redirect:/user/list";
     }
 }
