@@ -7,6 +7,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class UserDao {
     public void insert(User user) throws SQLException {
@@ -52,6 +54,36 @@ public class UserDao {
             }
 
             return user;
+        } finally {
+            if (rs != null) {
+                rs.close();
+            }
+            if (pstmt != null) {
+                pstmt.close();
+            }
+            if (con != null) {
+                con.close();
+            }
+        }
+    }
+
+    public List<User> findAll() throws SQLException {
+        Connection con = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        List<User> userList = new ArrayList<>();
+        try {
+            con = ConnectionManager.getConnection();
+            String sql = "SELECT userId, password, name, email FROM USERS";
+            pstmt = con.prepareStatement(sql);
+            rs = pstmt.executeQuery();
+
+            while (rs.next()) {
+                User user = new User(rs.getString("userId"), rs.getString("password"), rs.getString("name"),
+                        rs.getString("email"));
+                userList.add(user);
+            }
+            return userList;
         } finally {
             if (rs != null) {
                 rs.close();
