@@ -2,6 +2,7 @@ package chapter6to12.next.dao;
 
 import chapter6to12.next.model.User;
 
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -35,6 +36,8 @@ public class UserDao {
         JdbcTemplate jdbcTemplate = new JdbcTemplate();
         return jdbcTemplate.query(
                 sql,
+                pstmt -> {
+                },
                 rs -> new User(rs.getString("userId"), rs.getString("password"), rs.getString("name"), rs.getString("email"))
         );
     }
