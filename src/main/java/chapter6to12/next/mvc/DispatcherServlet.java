@@ -22,8 +22,6 @@ public class DispatcherServlet extends HttpServlet {
 
     private static final Logger logger = LoggerFactory.getLogger(DispatcherServlet.class);
 
-    private final static String REDIRECT_PREFIX = "redirect:";
-
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         RequestMapping requestMapping = new RequestMapping();
@@ -36,23 +34,12 @@ public class DispatcherServlet extends HttpServlet {
             throw new RuntimeException("올바르지 않은 url입니다.");
         }
         try {
-            String viewName = controller.execute(req, resp);
-            if (viewName != null) {
-                send(viewName, req, resp);
-            }
-
+            View view = controller.execute(req, resp);
+            view.render(req, resp);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
 
-    }
-
-    private void send(String viewName, HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        if (viewName.startsWith(REDIRECT_PREFIX)) {
-            resp.sendRedirect(viewName.substring(REDIRECT_PREFIX.length()));
-        } else {
-            req.getRequestDispatcher(viewName).forward(req, resp);
-        }
     }
 
     static class RequestMapping {

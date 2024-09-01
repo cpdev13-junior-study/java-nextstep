@@ -7,7 +7,7 @@ import javax.servlet.http.HttpServletResponse;
 
 public class AbstractController implements Controller {
     @Override
-    public String execute(HttpServletRequest request, HttpServletResponse response) throws Exception {
+    public View execute(HttpServletRequest request, HttpServletResponse response) throws Exception {
         Method method = Method.find(request.getMethod());
         if (method == Method.GET) {
             return doGet(request, response);
@@ -16,11 +16,11 @@ public class AbstractController implements Controller {
         }
     }
 
-    protected String doGet(HttpServletRequest request, HttpServletResponse response) throws Exception {
+    protected View doGet(HttpServletRequest request, HttpServletResponse response) throws Exception {
         return null;
     }
 
-    protected String doPost(HttpServletRequest request, HttpServletResponse response) throws Exception {
+    protected View doPost(HttpServletRequest request, HttpServletResponse response) throws Exception {
         return null;
     }
 }
