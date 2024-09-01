@@ -1,6 +1,6 @@
 package chapter6to12.next.web.Controller;
 
-import chapter6to12.core.db.DataBase;
+import chapter6to12.next.dao.UserDao;
 import chapter6to12.next.model.User;
 import chapter6to12.next.mvc.AbstractController;
 import org.slf4j.Logger;
@@ -17,8 +17,10 @@ public class CreateUserController extends AbstractController {
         User user = new User(req.getParameter("userId"), req.getParameter("password"), req.getParameter("name"),
                 req.getParameter("email"));
         log.debug("user : {}", user);
-        DataBase.addUser(user);
-        return "redirect:/user/list";
+
+        UserDao userDao = new UserDao();
+        userDao.insert(user);
+        return "redirect:/";
     }
 
     @Override

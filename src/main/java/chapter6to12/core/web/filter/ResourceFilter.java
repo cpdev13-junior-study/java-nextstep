@@ -44,7 +44,7 @@ public class ResourceFilter implements Filter {
 
     private boolean isResourceUrl(String url) {
         for (String prefix : resourcePrefixs) {
-            if (url.startsWith(prefix)) {
+            if (url.contains(prefix)) {
                 return true;
             }
         }
