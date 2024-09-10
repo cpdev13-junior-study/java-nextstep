@@ -1,11 +1,12 @@
 package chapter6to12.next.dao;
 
 import chapter6to12.next.jdbc.JdbcTemplate;
+import chapter6to12.next.jdbc.KeyHolder;
+import chapter6to12.next.jdbc.PreparedStatementCreator;
 import chapter6to12.next.jdbc.RowMapper;
 import chapter6to12.next.model.Question;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.List;
 
 public class QuestionDao {
@@ -24,6 +25,27 @@ public class QuestionDao {
         };
 
         return jdbcTemplate.query(sql, rm);
+    }
+
+    public Question insert(Question question){
+        JdbcTemplate jdbcTemplate = new JdbcTemplate();
+        String sql = "INSERT INTO QUESTIONS (writer, title, contents, createdDate, countOfAnswer) VALUES (?,?,?,?,?)";
+        PreparedStatementCreator psc = new PreparedStatementCreator() {
+            @Override
+            public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
+                PreparedStatement pstmt = con.prepareStatement(sql);
+                pstmt.setString(1, question.getWriter());
+                pstmt.setString(2, question.getTitle());
+                pstmt.setString(3, question.getContents());
+                pstmt.setTimestamp(4, new Timestamp(question.getTimeFromCreateDate()));
+                pstmt.setInt(5, question.getCountOfComment());
+                return pstmt;
+            }
+        };
+
+        KeyHolder keyHolder = new KeyHolder();
+        jdbcTemplate.update(psc, keyHolder);
+        return findById(keyHolder.getId());
     }
 
     public Question findById(long questionId) {
