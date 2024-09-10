@@ -2,6 +2,7 @@ package chapter6to12.next.web.Controller.qna;
 
 import chapter6to12.next.dao.QuestionDao;
 import chapter6to12.next.model.Question;
+import chapter6to12.next.model.User;
 import chapter6to12.next.mvc.AbstractController;
 import chapter6to12.next.mvc.ModelAndView;
 
@@ -12,11 +13,18 @@ public class AddQnaController extends AbstractController {
 
     @Override
     protected ModelAndView doGet(HttpServletRequest request, HttpServletResponse response) throws Exception {
-        return getJspView("/qna/form.jsp");
+        User user =(User)request.getSession().getAttribute("user");
+        if (user == null) {
+            return getJspView("redirect:/");
+        }
+        return getJspView("/qna/form.jsp").addObject("user", user);
     }
 
     @Override
     protected ModelAndView doPost(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        if (request.getSession().getAttribute("user") == null) {
+            return getJspView("redirect:/");
+        }
         String writer = request.getParameter("writer");
         String title = request.getParameter("title");
         String contents = request.getParameter("contents");

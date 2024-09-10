@@ -16,7 +16,7 @@
             <form name="question" method="post" action="">
                 <div class="form-group">
                     <label for="writer">글쓴이</label>
-                    <input class="form-control" id="writer" name="writer" placeholder="글쓴이"/>
+                    <input class="form-control" id="writer" name="writer"  value="${sessionScope.user.name}" placeholder="글쓴이"/>
                 </div>
                 <div class="form-group">
                     <label for="title">제목</label>
