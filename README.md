@@ -21,4 +21,11 @@
 6. 클라이언트에 랜더링된 jsp 파일을 전달하여 브라우저에 출력
 
 #### 7. next.web.qna package의 ShowController는 멀티 쓰레드 상황에서 문제가 발생하는 이유에 대해 설명하라.
-* 
+기존 코드는 클라이언트에 전달할 question과 answers가 멤버 변수로 되어 있어, 동시성 문제가 발생할 수 있다.  
+만약 A라는 클라이언트는 questionId가 1번인 question과 이와 관련된 answers를 가져왔다고 하자.  
+거의 동시에 A라는 클라이언트는 questionId가 2번인 question과 이와 관련된 answers를 가져왔다고 하자.
+이후, A라는 클라이언트에게 응답을 줄 때 A는 questionId가 2번인 question과 이와 관련된 answers를 전달해주게 된다.  
+이처럼 멤버 변수로 공유(heap 영역에 저장되어)하게 되어, 동시성 문제가 발생할 수 있다.  
+
+<br>
+따라서 클라이언트에게 전달할 변수들은 메서드 내부로 이동시켜야 한다(메서드는 stack 영역에 스레드별로 관리하여 동시성 문제가 발생하지 않음)
