@@ -5,6 +5,7 @@ import chapter6to12.next.jdbc.KeyHolder;
 import chapter6to12.next.jdbc.PreparedStatementCreator;
 import chapter6to12.next.jdbc.RowMapper;
 import chapter6to12.next.model.Question;
+import chapter6to12.next.model.User;
 
 import java.sql.*;
 import java.util.List;
@@ -79,6 +80,17 @@ public class QuestionDao {
         updateJdbcTemplate.update(
                 sql,
                 questionId
+        );
+    }
+
+    public void update(Question question) {
+        String sql = "UPDATE QUESTIONS SET title=?,contents=? WHERE questionId=?";
+        JdbcTemplate updateJdbcTemplate = new JdbcTemplate();
+        updateJdbcTemplate.update(
+                sql,
+                question.getTitle(),
+                question.getContents(),
+                question.getQuestionId()
         );
     }
 }

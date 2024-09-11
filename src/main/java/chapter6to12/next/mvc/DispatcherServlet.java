@@ -54,6 +54,7 @@ public class DispatcherServlet extends HttpServlet {
             mapping.put("/qna/form", new AddQnaController());
             mapping.put("/api/qna/addAnswer", new AddAnswerController());
             mapping.put("/api/qna/deleteAnswer", new DeleteAnswerController());
+            mapping.put("/qna/update", new QnaUpdateController());
             mapping.put("/api/qna/list", new QnaListController());
             mapping.put("/", new HomeController());
         }
