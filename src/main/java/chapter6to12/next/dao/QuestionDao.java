@@ -5,6 +5,7 @@ import chapter6to12.next.jdbc.KeyHolder;
 import chapter6to12.next.jdbc.PreparedStatementCreator;
 import chapter6to12.next.jdbc.RowMapper;
 import chapter6to12.next.model.Question;
+import chapter6to12.next.model.User;
 
 import java.sql.*;
 import java.util.List;
@@ -62,5 +63,14 @@ public class QuestionDao {
         };
 
         return jdbcTemplate.queryForObject(sql, rm, questionId);
+    }
+
+    public void increaseCount(long questionId) {
+        String sql = "UPDATE QUESTIONS SET countOfAnswer = countOfAnswer+1 WHERE questionId=?";
+        JdbcTemplate updateJdbcTemplate = new JdbcTemplate();
+        updateJdbcTemplate.update(
+                sql,
+                questionId
+        );
     }
 }

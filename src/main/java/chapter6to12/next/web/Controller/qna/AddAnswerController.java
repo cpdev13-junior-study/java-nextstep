@@ -1,6 +1,7 @@
 package chapter6to12.next.web.Controller.qna;
 
 import chapter6to12.next.dao.AnswerDao;
+import chapter6to12.next.dao.QuestionDao;
 import chapter6to12.next.model.Answer;
 import chapter6to12.next.mvc.AbstractController;
 import chapter6to12.next.mvc.ModelAndView;
@@ -19,6 +20,9 @@ public class AddAnswerController extends AbstractController {
         log.debug("answer : {}", answer);
 
         AnswerDao answerDao = new AnswerDao();
+        QuestionDao questionDao = new QuestionDao();
+        questionDao.increaseCount(answer.getQuestionId());
+
         Answer savedAnswer = answerDao.insert(answer);
 
         return getJsonView().addObject("answer", savedAnswer);
