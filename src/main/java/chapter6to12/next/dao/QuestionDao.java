@@ -5,14 +5,15 @@ import chapter6to12.next.jdbc.KeyHolder;
 import chapter6to12.next.jdbc.PreparedStatementCreator;
 import chapter6to12.next.jdbc.RowMapper;
 import chapter6to12.next.model.Question;
-import chapter6to12.next.model.User;
 
 import java.sql.*;
 import java.util.List;
 
 public class QuestionDao {
+
+    private final JdbcTemplate jdbcTemplate = JdbcTemplate.getInstance();
+
     public List<Question> findAll() {
-        JdbcTemplate jdbcTemplate = new JdbcTemplate();
         String sql = "SELECT questionId, writer, title, createdDate, countOfAnswer FROM QUESTIONS "
                 + "order by questionId desc";
 
@@ -29,7 +30,6 @@ public class QuestionDao {
     }
 
     public Question insert(Question question){
-        JdbcTemplate jdbcTemplate = new JdbcTemplate();
         String sql = "INSERT INTO QUESTIONS (writer, title, contents, createdDate, countOfAnswer) VALUES (?,?,?,?,?)";
         PreparedStatementCreator psc = new PreparedStatementCreator() {
             @Override
@@ -50,7 +50,7 @@ public class QuestionDao {
     }
 
     public Question findById(long questionId) {
-        JdbcTemplate jdbcTemplate = new JdbcTemplate();
+        JdbcTemplate jdbcTemplate = JdbcTemplate.getInstance();
         String sql = "SELECT questionId, writer, title, contents, createdDate, countOfAnswer FROM QUESTIONS "
                 + "WHERE questionId = ?";
 
@@ -67,8 +67,7 @@ public class QuestionDao {
 
     public void increaseCount(long questionId) {
         String sql = "UPDATE QUESTIONS SET countOfAnswer = countOfAnswer+1 WHERE questionId=?";
-        JdbcTemplate updateJdbcTemplate = new JdbcTemplate();
-        updateJdbcTemplate.update(
+        jdbcTemplate.update(
                 sql,
                 questionId
         );
@@ -76,8 +75,7 @@ public class QuestionDao {
 
     public void decreaseCount(long questionId) {
         String sql = "UPDATE QUESTIONS SET countOfAnswer = countOfAnswer-1 WHERE questionId=?";
-        JdbcTemplate updateJdbcTemplate = new JdbcTemplate();
-        updateJdbcTemplate.update(
+        jdbcTemplate.update(
                 sql,
                 questionId
         );
@@ -85,8 +83,7 @@ public class QuestionDao {
 
     public void update(Question question) {
         String sql = "UPDATE QUESTIONS SET title=?,contents=? WHERE questionId=?";
-        JdbcTemplate updateJdbcTemplate = new JdbcTemplate();
-        updateJdbcTemplate.update(
+        jdbcTemplate.update(
                 sql,
                 question.getTitle(),
                 question.getContents(),

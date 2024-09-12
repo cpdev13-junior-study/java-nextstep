@@ -11,6 +11,17 @@ import java.util.List;
 
 public class JdbcTemplate {
 
+    private static JdbcTemplate jdbcTemplate;
+
+    public JdbcTemplate() {
+    }
+
+    public static JdbcTemplate getInstance(){
+        if(jdbcTemplate==null){
+            jdbcTemplate = new JdbcTemplate();
+        }
+        return jdbcTemplate;
+    }
     public void insert(String sql, PreparedStatementSetter preparedStatementSetter) {
 
         try (Connection con = ConnectionManager.getConnection();
