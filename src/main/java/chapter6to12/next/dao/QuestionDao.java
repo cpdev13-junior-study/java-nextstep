@@ -90,4 +90,12 @@ public class QuestionDao {
                 question.getQuestionId()
         );
     }
+
+    public void delete(long questionId){
+        String sql = "DELETE FROM QUESTIONS WHERE questionId=?";
+        jdbcTemplate.update(
+                sql,
+                questionId
+        );
+    }
 }
