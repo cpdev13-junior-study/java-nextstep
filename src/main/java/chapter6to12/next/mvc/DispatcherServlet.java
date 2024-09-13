@@ -1,9 +1,7 @@
 package chapter6to12.next.mvc;
 
 import chapter6to12.next.web.Controller.*;
-import chapter6to12.next.web.Controller.qna.AddAnswerController;
-import chapter6to12.next.web.Controller.qna.DeleteAnswerController;
-import chapter6to12.next.web.Controller.qna.ShowController;
+import chapter6to12.next.web.Controller.qna.*;
 import chapter6to12.next.web.Controller.user.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,8 +51,13 @@ public class DispatcherServlet extends HttpServlet {
             mapping.put("/user/logout", new LogoutController());
             mapping.put("/user/update", new UpdateUserController());
             mapping.put("/qna/show", new ShowController());
+            mapping.put("/qna/form", new AddQnaController());
             mapping.put("/api/qna/addAnswer", new AddAnswerController());
             mapping.put("/api/qna/deleteAnswer", new DeleteAnswerController());
+            mapping.put("/api/qna/delete", new DeleteQuestionApiController());
+            mapping.put("/qna/delete", new DeleteQuestionController());
+            mapping.put("/qna/update", new QnaUpdateController());
+            mapping.put("/api/qna/list", new QnaListController());
             mapping.put("/", new HomeController());
         }
 

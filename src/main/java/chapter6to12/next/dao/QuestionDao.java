@@ -1,16 +1,19 @@
 package chapter6to12.next.dao;
 
 import chapter6to12.next.jdbc.JdbcTemplate;
+import chapter6to12.next.jdbc.KeyHolder;
+import chapter6to12.next.jdbc.PreparedStatementCreator;
 import chapter6to12.next.jdbc.RowMapper;
 import chapter6to12.next.model.Question;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.List;
 
 public class QuestionDao {
+
+    private final JdbcTemplate jdbcTemplate = JdbcTemplate.getInstance();
+
     public List<Question> findAll() {
-        JdbcTemplate jdbcTemplate = new JdbcTemplate();
         String sql = "SELECT questionId, writer, title, createdDate, countOfAnswer FROM QUESTIONS "
                 + "order by questionId desc";
 
@@ -26,8 +29,28 @@ public class QuestionDao {
         return jdbcTemplate.query(sql, rm);
     }
 
+    public Question insert(Question question){
+        String sql = "INSERT INTO QUESTIONS (writer, title, contents, createdDate, countOfAnswer) VALUES (?,?,?,?,?)";
+        PreparedStatementCreator psc = new PreparedStatementCreator() {
+            @Override
+            public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
+                PreparedStatement pstmt = con.prepareStatement(sql);
+                pstmt.setString(1, question.getWriter());
+                pstmt.setString(2, question.getTitle());
+                pstmt.setString(3, question.getContents());
+                pstmt.setTimestamp(4, new Timestamp(question.getTimeFromCreateDate()));
+                pstmt.setInt(5, question.getCountOfComment());
+                return pstmt;
+            }
+        };
+
+        KeyHolder keyHolder = new KeyHolder();
+        jdbcTemplate.update(psc, keyHolder);
+        return findById(keyHolder.getId());
+    }
+
     public Question findById(long questionId) {
-        JdbcTemplate jdbcTemplate = new JdbcTemplate();
+        JdbcTemplate jdbcTemplate = JdbcTemplate.getInstance();
         String sql = "SELECT questionId, writer, title, contents, createdDate, countOfAnswer FROM QUESTIONS "
                 + "WHERE questionId = ?";
 
@@ -40,5 +63,39 @@ public class QuestionDao {
         };
 
         return jdbcTemplate.queryForObject(sql, rm, questionId);
+    }
+
+    public void increaseCount(long questionId) {
+        String sql = "UPDATE QUESTIONS SET countOfAnswer = countOfAnswer+1 WHERE questionId=?";
+        jdbcTemplate.update(
+                sql,
+                questionId
+        );
+    }
+
+    public void decreaseCount(long questionId) {
+        String sql = "UPDATE QUESTIONS SET countOfAnswer = countOfAnswer-1 WHERE questionId=?";
+        jdbcTemplate.update(
+                sql,
+                questionId
+        );
+    }
+
+    public void update(Question question) {
+        String sql = "UPDATE QUESTIONS SET title=?,contents=? WHERE questionId=?";
+        jdbcTemplate.update(
+                sql,
+                question.getTitle(),
+                question.getContents(),
+                question.getQuestionId()
+        );
+    }
+
+    public void delete(long questionId){
+        String sql = "DELETE FROM QUESTIONS WHERE questionId=?";
+        jdbcTemplate.update(
+                sql,
+                questionId
+        );
     }
 }
