@@ -28,6 +28,8 @@ dependencies {
     implementation 'org.apache.tomcat.embed:tomcat-embed-jasper:8.0.15'
     implementation 'jakarta.servlet.jsp:jakarta.servlet.jsp-api:3.0.0'
 
+    // https://mvnrepository.com/artifact/org.reflections/reflections
+    implementation group: 'org.reflections', name: 'reflections', version: '0.10.2'
     testImplementation group: 'org.assertj', name: 'assertj-core', version: '3.22.0'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.3.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'

@@ -1,8 +1,11 @@
 package chapter6to12.next.mvc;
 
-import chapter6to12.next.web.Controller.*;
-import chapter6to12.next.web.Controller.qna.*;
-import chapter6to12.next.web.Controller.user.*;
+import chapter6to12.core.nmvc.AnnotationHandlerMapping;
+import chapter6to12.next.mvc.handler_adapter.AnnotationHandlerAdapter;
+import chapter6to12.next.mvc.handler_adapter.HandlerAdapter;
+import chapter6to12.next.mvc.handler_adapter.LegacyHandlerAdapter;
+import chapter6to12.next.web.controller.qna.*;
+import chapter6to12.next.web.controller.user.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,40 +14,72 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @WebServlet(name = "dispatcher", urlPatterns = "/", loadOnStartup = 1)
 public class DispatcherServlet extends HttpServlet {
 
     private static final Logger logger = LoggerFactory.getLogger(DispatcherServlet.class);
+    private List<HandlerMapping> handlerMappingList = new ArrayList<>();
+    private List<HandlerAdapter> handlerAdapterList = new ArrayList<>();
 
     @Override
-    protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        RequestMapping requestMapping = new RequestMapping();
-        String requestURI = req.getRequestURI();
+    public void init() throws ServletException {
+        LegacyRequestMapping legacyRequestMapping = new LegacyRequestMapping();
+        AnnotationHandlerMapping annotationHandlerMapping = new AnnotationHandlerMapping("chapter6to12.next.web.controller");
+        annotationHandlerMapping.initialize();
+        handlerMappingList.add(annotationHandlerMapping);
+        handlerMappingList.add(legacyRequestMapping);
 
-        logger.info("Method : {}, Request URI : {}", req.getMethod(), requestURI);
+        handlerAdapterList.add(new LegacyHandlerAdapter());
+        handlerAdapterList.add(new AnnotationHandlerAdapter());
+    }
 
-        Controller controller = requestMapping.getController(requestURI);
-        if (controller == null) {
-            throw new RuntimeException("올바르지 않은 url입니다.");
-        }
+    @Override
+    protected void service(HttpServletRequest req, HttpServletResponse resp) {
         try {
-            ModelAndView mav = controller.execute(req, resp);
-            View view = mav.getView();
-            view.render(mav.getModel(), req, resp);
+            String requestURI = req.getRequestURI();
+            logger.info("Method : {}, Request URI : {}", req.getMethod(), requestURI);
+
+            ModelAndView mav = handle(getHandler(req), req, resp);
+            render(mav, req, resp);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-
     }
 
-    static class RequestMapping {
-        private Map<String, Controller> mapping = new HashMap<>();
+    private ModelAndView handle(Object handler, HttpServletRequest request, HttpServletResponse response) throws Exception {
+        for (HandlerAdapter adapter : handlerAdapterList) {
+            if (adapter.isSupport(handler)) {
+                return adapter.handle(handler, request, response);
+            }
+        }
+        return null;
+    }
 
-        public RequestMapping() {
+    private Object getHandler(HttpServletRequest request) {
+        for (HandlerMapping handlerMapping : handlerMappingList) {
+            Object handler = handlerMapping.getHandler(request);
+            if (handler != null) return handler;
+        }
+        return null;
+    }
+
+    private void render(ModelAndView mav, HttpServletRequest request, HttpServletResponse response) throws Exception {
+        if (mav == null) {
+            throw new RuntimeException("url에 올바른 handler를 찾을 수 없습니다.");
+        }
+        View view = mav.getView();
+        view.render(mav.getModel(), request, response);
+    }
+
+    static class LegacyRequestMapping implements HandlerMapping {
+        private final Map<String, Controller> mapping = new HashMap<>();
+
+        public LegacyRequestMapping() {
             mapping.put("/user/create", new CreateUserController());
             mapping.put("/user/list", new ListUserController());
             mapping.put("/user/login", new LoginController());
@@ -58,11 +93,11 @@ public class DispatcherServlet extends HttpServlet {
             mapping.put("/qna/delete", new DeleteQuestionController());
             mapping.put("/qna/update", new QnaUpdateController());
             mapping.put("/api/qna/list", new QnaListController());
-            mapping.put("/", new HomeController());
         }
 
-        public Controller getController(String url) {
-            return mapping.get(url);
+        @Override
+        public Object getHandler(HttpServletRequest request) {
+            return mapping.get(request.getRequestURI());
         }
     }
 }

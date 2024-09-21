@@ -1,4 +1,4 @@
-package chapter6to12.next.web.Controller.qna;
+package chapter6to12.next.web.controller.qna;
 
 import chapter6to12.next.mvc.AbstractController;
 import chapter6to12.next.mvc.ModelAndView;
