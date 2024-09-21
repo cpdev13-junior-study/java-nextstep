@@ -1,8 +1,10 @@
 package chapter6to12.next.model;
 
 import lombok.Setter;
+import lombok.ToString;
 
 @Setter
+@ToString
 public class User {
     private String userId;
     private String password;

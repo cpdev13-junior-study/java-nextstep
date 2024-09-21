@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.Constructor;
 import java.util.Arrays;
 
 public class ReflectionTest {
@@ -28,9 +29,13 @@ public class ReflectionTest {
     }
 
     @Test
-    public void newInstanceWithConstructorArgs() {
+    public void newInstanceWithConstructorArgs() throws Exception {
         Class<User> clazz = User.class;
         logger.debug(clazz.getName());
+
+        final Constructor<User> constructor = clazz.getDeclaredConstructor(String.class, String.class, String.class, String.class);
+        final User user = constructor.newInstance("1", "password", "name", "hcsung@naver.com");
+        System.out.println(user);
     }
 
     @Test
