@@ -2,6 +2,7 @@ package chapter6to12.core.nmvc;
 
 import chapter6to12.core.annotation.RequestMapping;
 import chapter6to12.core.annotation.RequestMethod;
+import chapter6to12.next.mvc.HandlerMapping;
 import com.google.common.collect.Maps;
 import org.reflections.ReflectionUtils;
 
@@ -11,7 +12,7 @@ import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.Set;
 
-public class AnnotationHandlerMapping {
+public class AnnotationHandlerMapping implements HandlerMapping {
     private Object[] basePackage;
 
     private Map<HandlerKey, HandlerExecution> handlerExecutions = Maps.newHashMap();
@@ -39,6 +40,7 @@ public class AnnotationHandlerMapping {
         return new HandlerKey(rm.value(), rm.method());
     }
 
+    @Override
     public HandlerExecution getHandler(HttpServletRequest request) {
         String requestUri = request.getRequestURI();
         RequestMethod rm = RequestMethod.valueOf(request.getMethod().toUpperCase());
