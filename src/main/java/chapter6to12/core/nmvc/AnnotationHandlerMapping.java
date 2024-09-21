@@ -22,7 +22,7 @@ public class AnnotationHandlerMapping implements HandlerMapping {
     }
 
     @SuppressWarnings("unchecked")
-    public void initialize() throws Exception {
+    public void initialize() {
         final ControllerScanner scanner = new ControllerScanner(basePackage);
         final Map<Class<?>, Object> controllers = scanner.getControllers();
         for (Map.Entry<Class<?>, Object> scanInfo : controllers.entrySet()) {

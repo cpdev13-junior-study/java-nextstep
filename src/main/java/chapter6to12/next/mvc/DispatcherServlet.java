@@ -1,12 +1,15 @@
 package chapter6to12.next.mvc;
 
 import chapter6to12.core.nmvc.AnnotationHandlerMapping;
-import chapter6to12.core.nmvc.HandlerExecution;
+import chapter6to12.next.mvc.handler_adapter.AnnotationHandlerAdapter;
+import chapter6to12.next.mvc.handler_adapter.HandlerAdapter;
+import chapter6to12.next.mvc.handler_adapter.LegacyHandlerAdapter;
 import chapter6to12.next.web.controller.qna.*;
 import chapter6to12.next.web.controller.user.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -21,46 +24,54 @@ public class DispatcherServlet extends HttpServlet {
 
     private static final Logger logger = LoggerFactory.getLogger(DispatcherServlet.class);
     private List<HandlerMapping> handlerMappingList = new ArrayList<>();
+    private List<HandlerAdapter> handlerAdapterList = new ArrayList<>();
+
+    @Override
+    public void init() throws ServletException {
+        LegacyRequestMapping legacyRequestMapping = new LegacyRequestMapping();
+        AnnotationHandlerMapping annotationHandlerMapping = new AnnotationHandlerMapping("chapter6to12.next.web.controller");
+        annotationHandlerMapping.initialize();
+        handlerMappingList.add(annotationHandlerMapping);
+        handlerMappingList.add(legacyRequestMapping);
+
+        handlerAdapterList.add(new LegacyHandlerAdapter());
+        handlerAdapterList.add(new AnnotationHandlerAdapter());
+    }
+
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) {
         try {
             String requestURI = req.getRequestURI();
             logger.info("Method : {}, Request URI : {}", req.getMethod(), requestURI);
 
-            createHandlerMapping();
-            Object handler = getHandler(req);
-
-            ModelAndView mav = null;
-            if(handler instanceof Controller){
-                mav = ((Controller) handler).execute(req, resp);
-            } else if (handler instanceof HandlerExecution) {
-                mav = ((HandlerExecution) handler).handle(req, resp);
-            }  else {
-                throw new RuntimeException("url에 올바른 handler를 찾을 수 없습니다.");
-            }
-            render(mav,req,resp);
+            ModelAndView mav = handle(getHandler(req), req, resp);
+            render(mav, req, resp);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    private Object getHandler(HttpServletRequest request) {
-        for (HandlerMapping handlerMapping : handlerMappingList) {
-            Object handler = handlerMapping.getHandler(request);
-            if(handler!= null) return handler;
+    private ModelAndView handle(Object handler, HttpServletRequest request, HttpServletResponse response) throws Exception {
+        for (HandlerAdapter adapter : handlerAdapterList) {
+            if (adapter.isSupport(handler)) {
+                return adapter.handle(handler, request, response);
+            }
         }
         return null;
     }
 
-    private void createHandlerMapping() throws Exception {
-        LegacyRequestMapping legacyRequestMapping = new LegacyRequestMapping();
-        AnnotationHandlerMapping annotationHandlerMapping = new AnnotationHandlerMapping("chapter6to12.next.web.controller");
-        annotationHandlerMapping.initialize();
-        handlerMappingList.add(annotationHandlerMapping);
-        handlerMappingList.add(legacyRequestMapping);
+    private Object getHandler(HttpServletRequest request) {
+        for (HandlerMapping handlerMapping : handlerMappingList) {
+            Object handler = handlerMapping.getHandler(request);
+            if (handler != null) return handler;
+        }
+        return null;
     }
 
     private void render(ModelAndView mav, HttpServletRequest request, HttpServletResponse response) throws Exception {
+        if (mav == null) {
+            throw new RuntimeException("url에 올바른 handler를 찾을 수 없습니다.");
+        }
         View view = mav.getView();
         view.render(mav.getModel(), request, response);
     }
