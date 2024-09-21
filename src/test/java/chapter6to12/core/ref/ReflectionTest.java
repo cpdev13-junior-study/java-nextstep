@@ -7,7 +7,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.util.Arrays;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ReflectionTest {
     private static final Logger logger = LoggerFactory.getLogger(ReflectionTest.class);
@@ -39,8 +42,20 @@ public class ReflectionTest {
     }
 
     @Test
-    public void privateFieldAccess() {
+    public void privateFieldAccess() throws Exception {
         Class<Student> clazz = Student.class;
         logger.debug(clazz.getName());
+        final Student student = new Student();
+
+        final Field name = clazz.getDeclaredField("name");
+        name.setAccessible(true);
+        name.set(student,"hcsung");
+
+        final Field age = clazz.getDeclaredField("age");
+        age.setAccessible(true);
+        age.setInt(student, 26);
+
+        assertEquals("hcsung", student.getName());
+        assertEquals(26, student.getAge());
     }
 }
