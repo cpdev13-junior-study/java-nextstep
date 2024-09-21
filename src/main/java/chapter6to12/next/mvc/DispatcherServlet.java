@@ -1,17 +1,16 @@
 package chapter6to12.next.mvc;
 
-import chapter6to12.next.web.Controller.*;
-import chapter6to12.next.web.Controller.qna.*;
-import chapter6to12.next.web.Controller.user.*;
+import chapter6to12.core.nmvc.AnnotationHandlerMapping;
+import chapter6to12.core.nmvc.HandlerExecution;
+import chapter6to12.next.web.controller.qna.*;
+import chapter6to12.next.web.controller.user.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -21,24 +20,36 @@ public class DispatcherServlet extends HttpServlet {
     private static final Logger logger = LoggerFactory.getLogger(DispatcherServlet.class);
 
     @Override
-    protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        RequestMapping requestMapping = new RequestMapping();
-        String requestURI = req.getRequestURI();
-
-        logger.info("Method : {}, Request URI : {}", req.getMethod(), requestURI);
-
-        Controller controller = requestMapping.getController(requestURI);
-        if (controller == null) {
-            throw new RuntimeException("올바르지 않은 url입니다.");
-        }
+    protected void service(HttpServletRequest req, HttpServletResponse resp) {
         try {
-            ModelAndView mav = controller.execute(req, resp);
-            View view = mav.getView();
-            view.render(mav.getModel(), req, resp);
+            RequestMapping requestMapping = new RequestMapping();
+            AnnotationHandlerMapping annotationHandlerMapping = new AnnotationHandlerMapping("chapter6to12.next.web.controller");
+            annotationHandlerMapping.initialize();
+            String requestURI = req.getRequestURI();
+
+            HandlerExecution handler = annotationHandlerMapping.getHandler(req);
+
+            logger.info("Method : {}, Request URI : {}", req.getMethod(), requestURI);
+
+            Controller controller = requestMapping.getController(requestURI);
+
+            if (controller != null) {
+                render(controller.execute(req, resp), req, resp);
+            } else if (handler != null) {
+                render(handler.handle(req, resp), req, resp);
+            } else {
+                throw new RuntimeException("올바르지 않은 url입니다.");
+            }
+
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
 
+    }
+
+    private void render(ModelAndView mav, HttpServletRequest request, HttpServletResponse response) throws Exception {
+        View view = mav.getView();
+        view.render(mav.getModel(), request, response);
     }
 
     static class RequestMapping {
@@ -58,7 +69,7 @@ public class DispatcherServlet extends HttpServlet {
             mapping.put("/qna/delete", new DeleteQuestionController());
             mapping.put("/qna/update", new QnaUpdateController());
             mapping.put("/api/qna/list", new QnaListController());
-            mapping.put("/", new HomeController());
+//            mapping.put("/", new HomeController());
         }
 
         public Controller getController(String url) {
