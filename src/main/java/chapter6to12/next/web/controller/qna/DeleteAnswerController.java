@@ -1,4 +1,4 @@
-package chapter6to12.next.web.Controller.qna;
+package chapter6to12.next.web.controller.qna;
 
 import chapter6to12.next.dao.AnswerDao;
 import chapter6to12.next.dao.QuestionDao;
