@@ -20,8 +20,9 @@ public class QuestionService {
 
     public boolean deleteQuestion(Long questionId, User user) {
         Question findQuestion = questionDao.findById(questionId);
-        List<Answer> findAnswerList = answerDao.findAllByQuestionId(questionId);
         if (findQuestion == null) return false;
+        List<Answer> findAnswerList = answerDao.findAllByQuestionId(questionId);
+
         if (findQuestion.canDelete(user, findAnswerList)) {
             questionDao.delete(questionId);
             return true;
