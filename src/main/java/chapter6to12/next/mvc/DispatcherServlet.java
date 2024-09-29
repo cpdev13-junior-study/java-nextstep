@@ -1,9 +1,11 @@
 package chapter6to12.next.mvc;
 
 import chapter6to12.core.nmvc.AnnotationHandlerMapping;
+import chapter6to12.next.dao.JdbcQuestionDao;
 import chapter6to12.next.mvc.handler_adapter.AnnotationHandlerAdapter;
 import chapter6to12.next.mvc.handler_adapter.HandlerAdapter;
 import chapter6to12.next.mvc.handler_adapter.LegacyHandlerAdapter;
+import chapter6to12.next.service.QuestionService;
 import chapter6to12.next.web.controller.qna.*;
 import chapter6to12.next.web.controller.user.*;
 import org.slf4j.Logger;
@@ -80,6 +82,9 @@ public class DispatcherServlet extends HttpServlet {
         private final Map<String, Controller> mapping = new HashMap<>();
 
         public LegacyRequestMapping() {
+            JdbcQuestionDao jdbcQuestionDao = new JdbcQuestionDao();
+            QuestionService questionService = new QuestionService(jdbcQuestionDao);
+
             mapping.put("/user/create", new CreateUserController());
             mapping.put("/user/list", new ListUserController());
             mapping.put("/user/login", new LoginController());
@@ -89,8 +94,8 @@ public class DispatcherServlet extends HttpServlet {
             mapping.put("/qna/form", new AddQnaController());
             mapping.put("/api/qna/addAnswer", new AddAnswerController());
             mapping.put("/api/qna/deleteAnswer", new DeleteAnswerController());
-            mapping.put("/api/qna/delete", new DeleteQuestionApiController());
-            mapping.put("/qna/delete", new DeleteQuestionController());
+            mapping.put("/api/qna/delete", new DeleteQuestionApiController(questionService));
+            mapping.put("/qna/delete", new DeleteQuestionController(questionService));
             mapping.put("/qna/update", new QnaUpdateController());
             mapping.put("/api/qna/list", new QnaListController());
         }
