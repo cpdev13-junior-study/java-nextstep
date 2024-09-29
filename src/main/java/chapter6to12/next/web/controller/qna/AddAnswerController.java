@@ -1,7 +1,7 @@
 package chapter6to12.next.web.controller.qna;
 
-import chapter6to12.next.dao.AnswerDao;
-import chapter6to12.next.dao.QuestionDao;
+import chapter6to12.next.dao.JdbcAnswerDao;
+import chapter6to12.next.dao.JdbcQuestionDao;
 import chapter6to12.next.model.Answer;
 import chapter6to12.next.mvc.AbstractController;
 import chapter6to12.next.mvc.ModelAndView;
@@ -19,8 +19,8 @@ public class AddAnswerController extends AbstractController {
         Answer answer = new Answer(request.getParameter("writer"), request.getParameter("contents"), Long.parseLong(request.getParameter("questionId")));
         log.debug("answer : {}", answer);
 
-        AnswerDao answerDao = new AnswerDao();
-        QuestionDao questionDao = new QuestionDao();
+        JdbcAnswerDao answerDao = new JdbcAnswerDao();
+        JdbcQuestionDao questionDao = new JdbcQuestionDao();
         questionDao.increaseCount(answer.getQuestionId());
 
         Answer savedAnswer = answerDao.insert(answer);

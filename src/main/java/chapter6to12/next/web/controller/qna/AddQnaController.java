@@ -1,6 +1,6 @@
 package chapter6to12.next.web.controller.qna;
 
-import chapter6to12.next.dao.QuestionDao;
+import chapter6to12.next.dao.JdbcQuestionDao;
 import chapter6to12.next.model.Question;
 import chapter6to12.next.model.User;
 import chapter6to12.next.mvc.AbstractController;
@@ -28,7 +28,7 @@ public class AddQnaController extends AbstractController {
         String writer = request.getParameter("writer");
         String title = request.getParameter("title");
         String contents = request.getParameter("contents");
-        QuestionDao questionDao = new QuestionDao();
+        JdbcQuestionDao questionDao = new JdbcQuestionDao();
         questionDao.insert(new Question(writer, title, contents));
 
         return getJspView("redirect:/");

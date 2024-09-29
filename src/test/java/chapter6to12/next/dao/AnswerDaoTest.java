@@ -20,7 +20,7 @@ public class AnswerDaoTest {
     public void addAnswer() throws Exception {
         long questionId = 1L;
         Answer expected = new Answer("javajigi", "answer contents", questionId);
-        AnswerDao dut = new AnswerDao();
+        JdbcAnswerDao dut = new JdbcAnswerDao();
         Answer answer = dut.insert(expected);
         System.out.println("Answer : " + answer);
     }

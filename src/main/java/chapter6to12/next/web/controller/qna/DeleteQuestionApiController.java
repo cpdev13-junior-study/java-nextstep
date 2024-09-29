@@ -9,7 +9,11 @@ import javax.servlet.http.HttpServletResponse;
 
 public class DeleteQuestionApiController extends AbstractController {
 
-    private final QuestionService questionService = new QuestionService();
+    private final QuestionService questionService;
+
+    public DeleteQuestionApiController(QuestionService questionService) {
+        this.questionService = questionService;
+    }
 
     @Override
     protected ModelAndView doPost(HttpServletRequest request, HttpServletResponse response) throws Exception {
