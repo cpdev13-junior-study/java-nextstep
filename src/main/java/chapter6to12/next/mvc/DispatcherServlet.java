@@ -1,6 +1,8 @@
 package chapter6to12.next.mvc;
 
 import chapter6to12.core.nmvc.AnnotationHandlerMapping;
+import chapter6to12.next.dao.AnswerDao;
+import chapter6to12.next.dao.JdbcAnswerDao;
 import chapter6to12.next.dao.JdbcQuestionDao;
 import chapter6to12.next.mvc.handler_adapter.AnnotationHandlerAdapter;
 import chapter6to12.next.mvc.handler_adapter.HandlerAdapter;
@@ -83,7 +85,8 @@ public class DispatcherServlet extends HttpServlet {
 
         public LegacyRequestMapping() {
             JdbcQuestionDao jdbcQuestionDao = new JdbcQuestionDao();
-            QuestionService questionService = new QuestionService(jdbcQuestionDao);
+            AnswerDao answerDao = new JdbcAnswerDao();
+            QuestionService questionService = new QuestionService(jdbcQuestionDao,answerDao);
 
             mapping.put("/user/create", new CreateUserController());
             mapping.put("/user/list", new ListUserController());

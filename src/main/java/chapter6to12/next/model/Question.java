@@ -1,6 +1,7 @@
 package chapter6to12.next.model;
 
 import java.util.Date;
+import java.util.List;
 
 public class Question {
     private long questionId;
@@ -20,13 +21,25 @@ public class Question {
     }
 
     public Question(long questionId, String writer, String title, String contents, Date createdDate,
-            int countOfComment) {
+                    int countOfComment) {
         this.questionId = questionId;
         this.writer = writer;
         this.title = title;
         this.contents = contents;
         this.createdDate = createdDate;
         this.countOfComment = countOfComment;
+    }
+
+    public boolean canDelete(User user, List<Answer> answerList) {
+        if (!user.isSameUser(this.writer)) {
+            return false;
+        }
+        for (Answer answer : answerList) {
+            if(!answer.canDelete(user)){
+                return false;
+            }
+        }
+        return true;
     }
 
     public long getQuestionId() {
