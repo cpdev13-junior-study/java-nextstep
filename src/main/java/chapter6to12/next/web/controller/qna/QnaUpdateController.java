@@ -1,6 +1,6 @@
 package chapter6to12.next.web.controller.qna;
 
-import chapter6to12.next.dao.QuestionDao;
+import chapter6to12.next.dao.JdbcQuestionDao;
 import chapter6to12.next.model.Question;
 import chapter6to12.next.model.User;
 import chapter6to12.next.mvc.AbstractController;
@@ -14,7 +14,7 @@ public class QnaUpdateController extends AbstractController {
     @Override
     protected ModelAndView doGet(HttpServletRequest request, HttpServletResponse response) throws Exception {
         long questionId = Long.parseLong(request.getParameter("questionId"));
-        QuestionDao questionDao = new QuestionDao();
+        JdbcQuestionDao questionDao = new JdbcQuestionDao();
         Question question = questionDao.findById(questionId);
         User user = (User) request.getSession().getAttribute("user");
 
@@ -30,7 +30,7 @@ public class QnaUpdateController extends AbstractController {
         String title = request.getParameter("title");
         String contents = request.getParameter("contents");
 
-        QuestionDao questionDao = new QuestionDao();
+        JdbcQuestionDao questionDao = new JdbcQuestionDao();
         Question question = questionDao.findById(questionId);
 
         User user = (User) request.getSession().getAttribute("user");
