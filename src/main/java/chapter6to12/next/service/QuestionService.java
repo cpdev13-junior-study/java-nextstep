@@ -1,13 +1,14 @@
 package chapter6to12.next.service;
 
 import chapter6to12.next.dao.JdbcQuestionDao;
+import chapter6to12.next.dao.QuestionDao;
 import chapter6to12.next.model.Question;
 
 public class QuestionService {
 
-    private final JdbcQuestionDao questionDao;
+    private final QuestionDao questionDao;
 
-    public QuestionService(JdbcQuestionDao questionDao) {
+    public QuestionService(QuestionDao questionDao) {
         this.questionDao = questionDao;
     }
 
