@@ -33,7 +33,6 @@ public class AnnotationHandlerMapping implements HandlerMapping {
                 handlerExecutions.put(handlerKey, new HandlerExecution(scanInfo.getValue(), findMethod));
             }
         }
-
     }
 
     private HandlerKey createHandlerKey(RequestMapping rm) {

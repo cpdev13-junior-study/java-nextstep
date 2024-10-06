@@ -88,11 +88,8 @@ public class DispatcherServlet extends HttpServlet {
             AnswerDao answerDao = new JdbcAnswerDao();
             QuestionService questionService = new QuestionService(jdbcQuestionDao,answerDao);
 
-            mapping.put("/user/create", new CreateUserController());
-            mapping.put("/user/list", new ListUserController());
             mapping.put("/user/login", new LoginController());
             mapping.put("/user/logout", new LogoutController());
-            mapping.put("/user/update", new UpdateUserController());
             mapping.put("/qna/show", new ShowController());
             mapping.put("/qna/form", new AddQnaController());
             mapping.put("/api/qna/addAnswer", new AddAnswerController());
