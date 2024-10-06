@@ -1,10 +1,12 @@
 package chapter6to12.next.dao;
 
+import chapter6to12.core.annotation.Repository;
 import chapter6to12.next.jdbc.JdbcTemplate;
 import chapter6to12.next.model.User;
 
 import java.util.List;
 
+@Repository
 public class UserDao {
     private final JdbcTemplate jdbcTemplate = JdbcTemplate.getInstance();
 
