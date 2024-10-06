@@ -1,4 +1,4 @@
-package chapter6to12.core.di.example;
+package chapter6to12.core.di.factory.example;
 
 
 import chapter6to12.core.annotation.Inject;

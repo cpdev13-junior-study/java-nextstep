@@ -1,11 +1,11 @@
-package chapter6to12.core.di;
+package chapter6to12.core.di.factory;
 
 import chapter6to12.core.annotation.Controller;
 import chapter6to12.core.annotation.Repository;
 import chapter6to12.core.annotation.Service;
-import chapter6to12.core.di.example.MyQnaService;
-import chapter6to12.core.di.example.QnaController;
-import chapter6to12.core.di.factory.BeanFactory;
+import chapter6to12.core.di.factory.example.MyQnaService;
+import chapter6to12.core.di.factory.example.QnaController;
+
 import com.google.common.collect.Sets;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,7 +23,7 @@ public class BeanFactoryTest {
     @BeforeEach
     @SuppressWarnings("unchecked")
     public void setup() {
-        reflections = new Reflections("core.di.factory.example");
+        reflections = new Reflections("chapter6to12.core.di.factory.example");
         Set<Class<?>> preInstanticateClazz = getTypesAnnotatedWith(Controller.class, Service.class, Repository.class);
         beanFactory = new BeanFactory(preInstanticateClazz);
         beanFactory.initialize();
@@ -35,7 +35,6 @@ public class BeanFactoryTest {
 
         assertNotNull(qnaController);
         assertNotNull(qnaController.getQnaService());
-
         MyQnaService qnaService = qnaController.getQnaService();
         assertNotNull(qnaService.getUserRepository());
         assertNotNull(qnaService.getQuestionRepository());
