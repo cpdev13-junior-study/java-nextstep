@@ -1,16 +1,16 @@
 package chapter6to12.core.di.example;
 
-import core.annotation.Controller;
-import core.annotation.Inject;
-import core.annotation.RequestMapping;
-import core.mvc.ModelAndView;
-import core.nmvc.AbstractNewController;
+import chapter6to12.core.annotation.Controller;
+import chapter6to12.core.annotation.Inject;
+import chapter6to12.core.annotation.RequestMapping;
+import chapter6to12.next.mvc.AbstractController;
+import chapter6to12.next.mvc.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 @Controller
-public class QnaController extends AbstractNewController {
+public class QnaController extends AbstractController {
     private MyQnaService qnaService;
 
     @Inject
@@ -24,6 +24,6 @@ public class QnaController extends AbstractNewController {
 
     @RequestMapping("/questions")
     public ModelAndView list(HttpServletRequest request, HttpServletResponse response) throws Exception {
-        return jspView("/qna/list.jsp");
+        return getJspView("/qna/list.jsp");
     }
 }

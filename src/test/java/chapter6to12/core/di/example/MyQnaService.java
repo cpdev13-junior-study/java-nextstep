@@ -1,7 +1,8 @@
 package chapter6to12.core.di.example;
 
-import core.annotation.Inject;
-import core.annotation.Service;
+
+import chapter6to12.core.annotation.Inject;
+import chapter6to12.core.annotation.Service;
 
 @Service
 public class MyQnaService {
