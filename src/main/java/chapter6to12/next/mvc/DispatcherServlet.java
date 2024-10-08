@@ -33,7 +33,7 @@ public class DispatcherServlet extends HttpServlet {
     @Override
     public void init() throws ServletException {
         LegacyRequestMapping legacyRequestMapping = new LegacyRequestMapping();
-        AnnotationHandlerMapping annotationHandlerMapping = new AnnotationHandlerMapping("chapter6to12.next.web.controller");
+        AnnotationHandlerMapping annotationHandlerMapping = new AnnotationHandlerMapping("chapter6to12.next");
         annotationHandlerMapping.initialize();
         handlerMappingList.add(annotationHandlerMapping);
         handlerMappingList.add(legacyRequestMapping);
@@ -88,15 +88,10 @@ public class DispatcherServlet extends HttpServlet {
             AnswerDao answerDao = new JdbcAnswerDao();
             QuestionService questionService = new QuestionService(jdbcQuestionDao,answerDao);
 
-            mapping.put("/user/login", new LoginController());
-            mapping.put("/user/logout", new LogoutController());
-            mapping.put("/qna/show", new ShowController());
-            mapping.put("/qna/form", new AddQnaController());
+//            mapping.put("/qna/register", new AddQnaController());
             mapping.put("/api/qna/addAnswer", new AddAnswerController());
             mapping.put("/api/qna/deleteAnswer", new DeleteAnswerController());
             mapping.put("/api/qna/delete", new DeleteQuestionApiController(questionService));
-            mapping.put("/qna/delete", new DeleteQuestionController(questionService));
-            mapping.put("/qna/update", new QnaUpdateController());
             mapping.put("/api/qna/list", new QnaListController());
         }
 
