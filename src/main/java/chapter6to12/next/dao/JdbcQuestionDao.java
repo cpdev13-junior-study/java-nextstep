@@ -1,5 +1,6 @@
 package chapter6to12.next.dao;
 
+import chapter6to12.core.annotation.Repository;
 import chapter6to12.next.jdbc.JdbcTemplate;
 import chapter6to12.next.jdbc.KeyHolder;
 import chapter6to12.next.jdbc.PreparedStatementCreator;
@@ -9,6 +10,7 @@ import chapter6to12.next.model.Question;
 import java.sql.*;
 import java.util.List;
 
+@Repository
 public class JdbcQuestionDao implements QuestionDao{
 
     private final JdbcTemplate jdbcTemplate = JdbcTemplate.getInstance();

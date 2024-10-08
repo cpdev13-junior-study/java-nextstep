@@ -19,7 +19,7 @@ public class User {
     }
 
     public boolean isSameUser(String newUserId) {
-        return userId.equals(newUserId);
+        return name.equals(newUserId);
     }
 
     public void update(User user) {

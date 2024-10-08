@@ -9,7 +9,7 @@ import chapter6to12.next.mvc.ModelAndView;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-public class QnaUpdateController extends AbstractController {
+public class LegacyQnaUpdateController extends AbstractController {
 
     @Override
     protected ModelAndView doGet(HttpServletRequest request, HttpServletResponse response) throws Exception {
