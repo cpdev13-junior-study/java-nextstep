@@ -1,4 +1,4 @@
-package chapter6to12.next.web.controller.qna;
+package chapter6to12.next.web.controller.legacy;
 
 import chapter6to12.next.dao.JdbcAnswerDao;
 import chapter6to12.next.dao.JdbcQuestionDao;
@@ -10,7 +10,7 @@ import chapter6to12.next.mvc.ModelAndView;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-public class DeleteAnswerController extends AbstractController {
+public class LegacyDeleteAnswerController extends AbstractController {
     @Override
     protected ModelAndView doPost(HttpServletRequest request, HttpServletResponse response) throws Exception {
         JdbcAnswerDao answerDao = new JdbcAnswerDao();

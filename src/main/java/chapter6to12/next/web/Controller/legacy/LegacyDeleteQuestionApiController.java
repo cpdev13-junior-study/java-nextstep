@@ -1,4 +1,4 @@
-package chapter6to12.next.web.controller.qna;
+package chapter6to12.next.web.controller.legacy;
 
 import chapter6to12.next.model.User;
 import chapter6to12.next.mvc.AbstractController;
@@ -8,11 +8,11 @@ import chapter6to12.next.service.QuestionService;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-public class DeleteQuestionApiController extends AbstractController {
+public class LegacyDeleteQuestionApiController extends AbstractController {
 
     private final QuestionService questionService;
 
-    public DeleteQuestionApiController(QuestionService questionService) {
+    public LegacyDeleteQuestionApiController(QuestionService questionService) {
         this.questionService = questionService;
     }
 
