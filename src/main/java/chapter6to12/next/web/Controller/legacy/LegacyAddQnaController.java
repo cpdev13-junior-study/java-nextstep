@@ -1,4 +1,4 @@
-package chapter6to12.next.web.controller.qna;
+package chapter6to12.next.web.controller.legacy;
 
 import chapter6to12.next.dao.JdbcQuestionDao;
 import chapter6to12.next.model.Question;
@@ -9,7 +9,7 @@ import chapter6to12.next.mvc.ModelAndView;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-public class AddQnaController extends AbstractController {
+public class LegacyAddQnaController extends AbstractController {
 
     @Override
     protected ModelAndView doGet(HttpServletRequest request, HttpServletResponse response) throws Exception {

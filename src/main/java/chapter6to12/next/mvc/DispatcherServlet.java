@@ -8,8 +8,8 @@ import chapter6to12.next.mvc.handler_adapter.AnnotationHandlerAdapter;
 import chapter6to12.next.mvc.handler_adapter.HandlerAdapter;
 import chapter6to12.next.mvc.handler_adapter.LegacyHandlerAdapter;
 import chapter6to12.next.service.QuestionService;
-import chapter6to12.next.web.controller.qna.*;
-import chapter6to12.next.web.controller.user.*;
+import chapter6to12.next.web.controller.legacy.LegacyDeleteQuestionApiController;
+import chapter6to12.next.web.controller.legacy.LegacyQnaListController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -80,19 +80,20 @@ public class DispatcherServlet extends HttpServlet {
         view.render(mav.getModel(), request, response);
     }
 
+    @Deprecated
     static class LegacyRequestMapping implements HandlerMapping {
         private final Map<String, Controller> mapping = new HashMap<>();
 
         public LegacyRequestMapping() {
-            JdbcQuestionDao jdbcQuestionDao = new JdbcQuestionDao();
-            AnswerDao answerDao = new JdbcAnswerDao();
-            QuestionService questionService = new QuestionService(jdbcQuestionDao,answerDao);
+//            JdbcQuestionDao jdbcQuestionDao = new JdbcQuestionDao();
+//            AnswerDao answerDao = new JdbcAnswerDao();
+//            QuestionService questionService = new QuestionService(jdbcQuestionDao, answerDao);
 
-//            mapping.put("/qna/register", new AddQnaController());
-            mapping.put("/api/qna/addAnswer", new AddAnswerController());
-            mapping.put("/api/qna/deleteAnswer", new DeleteAnswerController());
-            mapping.put("/api/qna/delete", new DeleteQuestionApiController(questionService));
-            mapping.put("/api/qna/list", new QnaListController());
+//            mapping.put("/qna/register", new LegacyAddQnaController());
+//            mapping.put("/api/qna/addAnswer", new LegacyAddAnswerController());
+//            mapping.put("/api/qna/deleteAnswer", new LegacyDeleteAnswerController());
+//            mapping.put("/api/qna/delete", new LegacyDeleteQuestionApiController(questionService));
+//            mapping.put("/api/qna/list", new LegacyQnaListController());
         }
 
         @Override

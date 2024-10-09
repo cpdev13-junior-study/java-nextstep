@@ -1,4 +1,4 @@
-package chapter6to12.next.web.controller.qna;
+package chapter6to12.next.web.controller.legacy;
 
 import chapter6to12.next.dao.JdbcAnswerDao;
 import chapter6to12.next.dao.JdbcQuestionDao;
@@ -11,8 +11,8 @@ import org.slf4j.LoggerFactory;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-public class AddAnswerController extends AbstractController {
-    private static final Logger log = LoggerFactory.getLogger(AddAnswerController.class);
+public class LegacyAddAnswerController extends AbstractController {
+    private static final Logger log = LoggerFactory.getLogger(LegacyAddAnswerController.class);
 
     @Override
     protected ModelAndView doPost(HttpServletRequest request, HttpServletResponse response) throws Exception {

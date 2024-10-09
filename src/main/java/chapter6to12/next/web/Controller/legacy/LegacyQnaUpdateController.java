@@ -1,4 +1,4 @@
-package chapter6to12.next.web.controller.qna;
+package chapter6to12.next.web.controller.legacy;
 
 import chapter6to12.next.dao.JdbcQuestionDao;
 import chapter6to12.next.model.Question;
